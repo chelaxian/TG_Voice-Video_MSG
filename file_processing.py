@@ -19,19 +19,48 @@ def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
 
-    # Обрезка аудиофайлов до 60 минут
-    if audio.duration > 3600:
-        audio = audio.subclip(0, 3600)
+    # Обрезка аудиофайлов до 10 минут (600 секунд) для транскрибации
+    if audio.duration > 600:
+        audio = audio.subclip(0, 600)
 
-    # Конвертация аудио в формат ogg с кодеком opus
-    ffmpeg.input(file_path).output(output_path,
-                                   acodec='libopus',
-                                   audio_bitrate='64k',
-                                   format='ogg',
-                                   application='voip',
-                                   compression_level=10,
-                                   ar='48000',
-                                   ac=1).run(overwrite_output=True)
+    # Получение метаданных из исходного файла
+    probe = ffmpeg.probe(file_path)
+    metadata = {}
+    for stream in probe['streams']:
+        if stream['codec_type'] == 'audio':
+            metadata.update(stream.get('tags', {}))
+
+    # Обновление и добавление новых метаданных
+    metadata.update({
+        'artist': 'Telegram',
+        'title': 'Telegram Voice Message',
+        'album': 'Telegram Voice Messages',
+        'encoder': 'Lavf58.76.100'
+    })
+
+    # Формирование команды ffmpeg
+    input_file = ffmpeg.input(file_path)
+    audio_output = ffmpeg.output(input_file, output_path,
+                                 acodec='libopus',
+                                 audio_bitrate='64k',
+                                 format='ogg',
+                                 application='voip',
+                                 compression_level=10,
+                                 ar='48000',
+                                 ac=1)
+
+    # Добавление метаданных
+    for key, value in metadata.items():
+        audio_output = audio_output.global_args('-metadata', f'{key}={value}')
+
+    # Добавление комментариев
+    audio_output = audio_output.global_args(
+        '-metadata', 'comment=Telegram Voice Message'
+    )
+
+    # Выполнение команды ffmpeg
+    audio_output.run(overwrite_output=True)
+
     return output_path
 
 def convert_to_round_video(file_path):
