@@ -4,9 +4,12 @@ def get_user_link(user_id):
     return f"tg://user?id={user_id}"
 
 def get_group_link(group_id):
-    if str(group_id).startswith('-100'):
-        return f"https://t.me/c/{str(group_id)[4:]}"
-    return str(group_id)
+    group_id_str = str(group_id)
+    if group_id_str.startswith('-100'):
+        # Ссылка для супергрупп и каналов
+        return f"https://t.me/c/{group_id_str[4:]}"
+    # Обычные группы не имеют ссылок, просто возвращаем ID
+    return group_id_str
 
 messages = {
     "welcome": {
@@ -45,19 +48,19 @@ messages = {
         "CN": "无效的文件格式。请上传音频或视频文件。\n\n`/STOP_voice-video_bot` - 停止机器人"
     },
     "invalid_id": {
-        "RU": "Неверный формат ID. Попробуйте снова.\n\n`/STOP_voice-video_bot` - остановить бота",
-        "EN": "Invalid ID format. Try again.\n\n`/STOP_voice-video_bot` - stop the bot",
-        "CN": "无效的ID格式。请再试一次。\n\n`/STOP_voice-video_bot` - 停止机器人"
+        "RU": "Неверный формат ID. Попробуйте снова. Для групп ID должен начинаться со знака `-`.\n\n`/STOP_voice-video_bot` - остановить бота",
+        "EN": "Invalid ID format. Try again. Group IDs must start with the `-` sign.\n\n`/STOP_voice-video_bot` - stop the bot",
+        "CN": "无效的ID格式。请再试一次。群组ID必须以 `-` 符号开头。\n\n`/STOP_voice-video_bot` - 停止机器人"
     },
     "send_id": {
-        "RU": "Файл успешно конвертирован. Пожалуйста, отправьте ID чата/пользователя.\n\n`/STOP_voice-video_bot` - остановить бота",
-        "EN": "File successfully converted. Please send the chat/user ID.\n\n`/STOP_voice-video_bot` - stop the bot",
-        "CN": "文件转换成功。请发送聊天/用户ID。\n\n`/STOP_voice-video_bot` - 停止机器人"
+        "RU": "Файл успешно конвертирован. Пожалуйста, отправьте ID чата/пользователя. Для групп ID должен начинаться со знака `-`.\n\n`/STOP_voice-video_bot` - остановить бота",
+        "EN": "File successfully converted. Please send the chat/user ID. Group IDs must start with the `-` sign.\n\n`/STOP_voice-video_bot` - stop the bot",
+        "CN": "文件转换成功。请发送聊天/用户ID。群组ID必须以 `-` 符号开头。\n\n`/STOP_voice-video_bot` - 停止机器人"
     },
     "send_next_id": {
-        "RU": "Сообщение отправлено пользователю/группе {id}. Введите следующий ID для повторной отправки.\n\n`/STOP_voice-video_bot` - остановить бота",
-        "EN": "Message sent to user/group {id}. Enter the next ID to resend.\n\n`/STOP_voice-video_bot` - stop the bot",
-        "CN": "消息已发送给用户/群组 {id}。输入下一个ID重新发送。\n\n`/STOP_voice-video_bot` - 停止机器人"
+        "RU": "Сообщение отправлено пользователю/группе {id}. Введите следующий ID для повторной отправки. Для групп ID должен начинаться со знака `-`.\n\n`/STOP_voice-video_bot` - остановить бота",
+        "EN": "Message sent to user/group {id}. Enter the next ID to resend. Group IDs must start with the `-` sign.\n\n`/STOP_voice-video_bot` - stop the bot",
+        "CN": "消息已发送给用户/群组 {id}。输入下一个ID重新发送。群组ID必须以 `-` 符号开头。\n\n`/STOP_voice-video_bot` - 停止机器人"
     },
     "conversion_error": {
         "RU": "Ошибка при конвертации файла: {error}\n\n`/STOP_voice-video_bot` - остановить бота",
@@ -73,4 +76,3 @@ messages = {
 
 def get_message(key, language):
     return messages[key][language]
-
