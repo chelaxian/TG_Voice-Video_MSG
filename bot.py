@@ -5,6 +5,7 @@ from telethon import TelegramClient, events
 from config import api_id, api_hash, allowed_user_id, language, max_file_size_mb, audio_formats, video_formats
 from messages import get_message, get_user_link, get_group_link
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files
+from telethon.tl.types import DocumentAttributeAudio
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -86,35 +87,39 @@ async def handle_media(event):
 
     logger.info(f"Downloading file from user {event.sender_id}")
 
-    # Отправляем сообщение об ожидании загрузки
-    download_message = await event.reply(get_message("downloading", language))
+    download_message = await event.reply(get_message("processing_download", language))
     processing_messages.append(download_message.id)
 
-    file_ext = os.path.splitext(file.name)[1]  # Получаем расширение файла
+    file_ext = os.path.splitext(file.name)[1]
     downloaded_file_path = await event.message.download_media(file=f'downloaded_media{file_ext}')
     user_file = downloaded_file_path
     logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
 
-    # Удаляем сообщение об ожидании загрузки
     await client.delete_messages(event.chat_id, download_message.id)
 
-    # Выводим имя файла
     logger.info(f"Downloaded file path: {downloaded_file_path}")
 
-    # Отправляем сообщение об ожидании обработки
-    processing_message = await event.reply(get_message("processing", language))
+    processing_message = await event.reply(get_message("processing_conversion", language))
     processing_messages.append(processing_message.id)
 
     try:
         logger.info(f"Checking if file is audio: {downloaded_file_path}")
         if is_audio_file(downloaded_file_path):
             logger.info("File is an audio file, converting to voice message.")
-            convert_to_voice(downloaded_file_path)
+            output_file, waveform, duration = convert_to_voice(downloaded_file_path)
+            await client.send_file(event.chat_id, output_file, voice_note=True, attributes=[
+                DocumentAttributeAudio(
+                    duration=duration,
+                    voice=True,
+                    waveform=waveform
+                )
+            ])
             send_id_message = await event.reply(get_message("send_id", language))
             processing_messages.append(send_id_message.id)
         elif is_video_file(downloaded_file_path):
             logger.info("File is a video file, converting to round video.")
-            convert_to_round_video(downloaded_file_path)
+            output_file = convert_to_round_video(downloaded_file_path)
+            await client.send_file(event.chat_id, output_file, video_note=True)
             send_id_message = await event.reply(get_message("send_id", language))
             processing_messages.append(send_id_message.id)
         else:
@@ -129,7 +134,6 @@ async def handle_media(event):
         logger.error(f"Error during file conversion: {e}")
         user_file = None
 
-    # Удаляем сообщение об ожидании обработки
     await client.delete_messages(event.chat_id, processing_message.id)
 
 @client.on(events.NewMessage(func=lambda e: str(e.sender_id) == allowed_user_id and bot_active and e.chat_id == int(allowed_user_id) and not e.file))
@@ -147,24 +151,31 @@ async def handle_id(event):
 
     user_chat_id = int(chat_id)
     await send_media_message(event)
-    awaiting_id = True  # Оставляем awaiting_id в True для ожидания следующего ID
+    awaiting_id = True
 
 async def send_media_message(event):
     global user_chat_id, user_file, processing_messages
     try:
-        # Отправляем сообщение об ожидании отправки
-        sending_message = await event.reply(get_message("sending", language))
+        sending_message = await event.reply(get_message("processing_send", language))
         processing_messages.append(sending_message.id)
 
         if is_audio_file(user_file):
-            await client.send_file(user_chat_id, 'converted_voice.ogg', voice_note=True)
+            output_file, waveform, duration = convert_to_voice(user_file)
+            await client.send_file(user_chat_id, output_file, voice_note=True, attributes=[
+                DocumentAttributeAudio(
+                    duration=duration,
+                    voice=True,
+                    waveform=waveform
+                )
+            ])
         elif is_video_file(user_file):
-            await client.send_file(user_chat_id, 'converted_video.mp4', video_note=True)
+            output_file = convert_to_round_video(user_file)
+            await client.send_file(user_chat_id, output_file, video_note=True)
+
         link = get_user_link(user_chat_id) if user_chat_id > 0 else get_group_link(user_chat_id)
         send_next_id_message = await event.reply(get_message("send_next_id", language).format(id=link), parse_mode='markdown')
         processing_messages.append(send_next_id_message.id)
 
-        # Удаляем сообщение об ожидании отправки
         await client.delete_messages(event.chat_id, sending_message.id)
     except Exception as e:
         send_error_message = await event.reply(get_message("send_error", language).format(error=e))
@@ -178,3 +189,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
