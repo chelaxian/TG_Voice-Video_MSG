@@ -70,15 +70,22 @@ async def handle_media(event):
         return
 
     logger.info(f"Downloading file from user {event.sender_id}")
-    downloaded_file_path = await event.message.download_media(file='downloaded_media')
+    file_ext = os.path.splitext(file.name)[1]  # Получаем расширение файла
+    downloaded_file_path = await event.message.download_media(file=f'downloaded_media{file_ext}')
     user_file = downloaded_file_path
     logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
-
+    
+    # Выводим имя файла
+    logger.info(f"Downloaded file path: {downloaded_file_path}")
+    
     try:
+        logger.info(f"Checking if file is audio: {downloaded_file_path}")
         if is_audio_file(downloaded_file_path):
+            logger.info("File is an audio file, converting to voice message.")
             convert_to_voice(downloaded_file_path)
             await event.reply(get_message("send_id", language))
         elif is_video_file(downloaded_file_path):
+            logger.info("File is a video file, converting to round video.")
             convert_to_round_video(downloaded_file_path)
             await event.reply(get_message("send_id", language))
         else:
