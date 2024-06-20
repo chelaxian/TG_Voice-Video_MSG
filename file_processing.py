@@ -1,14 +1,18 @@
-# file_processing.py
 import os
 import ffmpeg
+import logging
 from moviepy.editor import VideoFileClip
-from PIL import Image
 from config import audio_formats, video_formats
 
+# Инициализация логгера
+logger = logging.getLogger(__name__)
+
 def is_audio_file(file_path):
+    logger.info(f"Checking audio file format for: {file_path}")
     return file_path.lower().endswith(tuple(audio_formats))
 
 def is_video_file(file_path):
+    logger.info(f"Checking video file format for: {file_path}")
     return file_path.lower().endswith(tuple(video_formats))
 
 def convert_to_voice(file_path):
@@ -39,4 +43,3 @@ def cleanup_files():
     for file in os.listdir('.'):
         if file.startswith('downloaded_media'):
             os.remove(file)
-
