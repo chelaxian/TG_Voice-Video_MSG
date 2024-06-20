@@ -111,8 +111,8 @@ This bot allows you to send voice messages and round videos to specified users o
 4. Create a new application and obtain the `api_id` and `api_hash`.
 
 ### Notes
-
-- Ensure the bot token and user ID are correctly set in the config.py file.
+- No BotFather token needed! Works with your Telegram account directly! 
+- Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user ID specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
 
