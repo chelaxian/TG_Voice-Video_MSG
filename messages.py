@@ -71,6 +71,21 @@ messages = {
         "RU": "Ошибка при отправке сообщения: {error}\n\n`/STOP_voice-video_bot` - остановить бота",
         "EN": "Error sending message: {error}\n\n`/STOP_voice-video_bot` - stop the bot",
         "CN": "发送消息时出错：{error}\n\n`/STOP_voice-video_bot` - 停止机器人"
+    },
+    "processing": {
+        "RU": "Обработка файла. Пожалуйста, подождите...",
+        "EN": "Processing the file. Please wait...",
+        "CN": "正在处理文件。请稍候..."
+    },
+    "downloading": {
+        "RU": "Загрузка файла. Пожалуйста, подождите...",
+        "EN": "Downloading the file. Please wait...",
+        "CN": "正在下载文件。请稍候..."
+    },
+    "sending": {
+        "RU": "Отправка файла. Пожалуйста, подождите...",
+        "EN": "Sending the file. Please wait...",
+        "CN": "正在发送文件。请稍候..."
     }
 }
 
