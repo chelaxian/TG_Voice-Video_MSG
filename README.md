@@ -95,7 +95,7 @@ This bot allows you to send voice messages and round videos to specified users o
     Send `/START_voice-video_bot` to your Telegram "Saved Messages" chat.
 
 2. **Send a file:**
-    Upload an audio or video file to the "Saved Messages" chat.
+    Upload or repost an audio or video file to the "Saved Messages" chat.
 
 3. **Provide chat/user ID:**
     After the file is processed, the bot will ask for the chat/user ID to send the file to. Enter the chat/user ID.
