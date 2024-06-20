@@ -17,6 +17,7 @@ user_chat_id = None
 downloaded_file_path = None
 bot_active = False
 awaiting_id = False
+processing_messages = []
 
 async def send_welcome_message():
     welcome_message = get_message("welcome", language)
@@ -26,7 +27,7 @@ async def send_welcome_message():
 
 @client.on(events.NewMessage(pattern='/START_voice-video_bot'))
 async def start(event):
-    global bot_active, user_file, user_chat_id, awaiting_id
+    global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
     if str(event.sender_id) != allowed_user_id:
         logger.warning(f"User {event.sender_id} attempted to use the bot without access.")
         return
@@ -35,13 +36,16 @@ async def start(event):
     user_file = None
     user_chat_id = None
     awaiting_id = False
+    processing_messages = []
     logger.info(f"Received /START_voice-video_bot command from user {event.sender_id}")
-    await event.reply(get_message("start", language))
-    await event.reply(get_message("send_file", language))
+    start_message = await event.reply(get_message("start", language))
+    processing_messages.append(start_message.id)
+    send_file_message = await event.reply(get_message("send_file", language))
+    processing_messages.append(send_file_message.id)
 
 @client.on(events.NewMessage(pattern='/STOP_voice-video_bot'))
 async def stop(event):
-    global bot_active, user_file, user_chat_id, awaiting_id
+    global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
     if str(event.sender_id) != allowed_user_id:
         return
 
@@ -50,64 +54,95 @@ async def stop(event):
     user_chat_id = None
     awaiting_id = False
     cleanup_files()
-    await event.reply(get_message("stop", language))
+    stop_message = await event.reply(get_message("stop", language))
     logger.info(f"Bot stopped by user {event.sender_id}. Files cleaned up.")
+    processing_messages.append(stop_message.id)
+
+    # Удаляем все сообщения после старта бота
+    for msg_id in processing_messages:
+        try:
+            await client.delete_messages(event.chat_id, msg_id)
+        except Exception as e:
+            logger.error(f"Error deleting message {msg_id}: {e}")
+    processing_messages = []
 
 @client.on(events.NewMessage(func=lambda e: str(e.sender_id) == allowed_user_id and bot_active and e.chat_id == int(allowed_user_id) and e.file))
 async def handle_media(event):
-    global user_file, downloaded_file_path, awaiting_id
+    global user_file, downloaded_file_path, awaiting_id, processing_messages
     logger.info(f"Received file from user {event.sender_id}")
 
     file = event.message.file
     if not file:
-        await event.reply(get_message("invalid_file", language))
+        invalid_file_message = await event.reply(get_message("invalid_file", language))
+        processing_messages.append(invalid_file_message.id)
         logger.warning(f"User {event.sender_id} sent an invalid file.")
         return
 
     if file.size > max_file_size_mb * 1024 * 1024:
-        await event.reply(get_message("large_file", language))
+        large_file_message = await event.reply(get_message("large_file", language))
+        processing_messages.append(large_file_message.id)
         logger.warning(f"User {event.sender_id} sent a file larger than {max_file_size_mb}MB.")
         return
 
     logger.info(f"Downloading file from user {event.sender_id}")
+
+    # Отправляем сообщение об ожидании загрузки
+    download_message = await event.reply(get_message("downloading", language))
+    processing_messages.append(download_message.id)
+
     file_ext = os.path.splitext(file.name)[1]  # Получаем расширение файла
     downloaded_file_path = await event.message.download_media(file=f'downloaded_media{file_ext}')
     user_file = downloaded_file_path
     logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
-    
+
+    # Удаляем сообщение об ожидании загрузки
+    await client.delete_messages(event.chat_id, download_message.id)
+
     # Выводим имя файла
     logger.info(f"Downloaded file path: {downloaded_file_path}")
-    
+
+    # Отправляем сообщение об ожидании обработки
+    processing_message = await event.reply(get_message("processing", language))
+    processing_messages.append(processing_message.id)
+
     try:
         logger.info(f"Checking if file is audio: {downloaded_file_path}")
         if is_audio_file(downloaded_file_path):
             logger.info("File is an audio file, converting to voice message.")
             convert_to_voice(downloaded_file_path)
-            await event.reply(get_message("send_id", language))
+            send_id_message = await event.reply(get_message("send_id", language))
+            processing_messages.append(send_id_message.id)
         elif is_video_file(downloaded_file_path):
             logger.info("File is a video file, converting to round video.")
             convert_to_round_video(downloaded_file_path)
-            await event.reply(get_message("send_id", language))
+            send_id_message = await event.reply(get_message("send_id", language))
+            processing_messages.append(send_id_message.id)
         else:
-            await event.reply(get_message("invalid_format", language))
+            invalid_format_message = await event.reply(get_message("invalid_format", language))
+            processing_messages.append(invalid_format_message.id)
             logger.warning(f"User {event.sender_id} sent a file with unsupported format.")
             user_file = None
         awaiting_id = True
     except Exception as e:
-        await event.reply(get_message("conversion_error", language).format(error=e))
+        conversion_error_message = await event.reply(get_message("conversion_error", language).format(error=e))
+        processing_messages.append(conversion_error_message.id)
         logger.error(f"Error during file conversion: {e}")
         user_file = None
 
+    # Удаляем сообщение об ожидании обработки
+    await client.delete_messages(event.chat_id, processing_message.id)
+
 @client.on(events.NewMessage(func=lambda e: str(e.sender_id) == allowed_user_id and bot_active and e.chat_id == int(allowed_user_id) and not e.file))
 async def handle_id(event):
-    global user_chat_id, user_file, awaiting_id
+    global user_chat_id, user_file, awaiting_id, processing_messages
     if not awaiting_id:
         return
 
     chat_id = event.message.text.strip()
     if not chat_id.lstrip('-').isdigit():
+        invalid_id_message = await event.reply(get_message("invalid_id", language))
+        processing_messages.append(invalid_id_message.id)
         awaiting_id = True
-        await event.reply(get_message("invalid_id", language))
         return
 
     user_chat_id = int(chat_id)
@@ -115,16 +150,25 @@ async def handle_id(event):
     awaiting_id = True  # Оставляем awaiting_id в True для ожидания следующего ID
 
 async def send_media_message(event):
-    global user_chat_id, user_file
+    global user_chat_id, user_file, processing_messages
     try:
+        # Отправляем сообщение об ожидании отправки
+        sending_message = await event.reply(get_message("sending", language))
+        processing_messages.append(sending_message.id)
+
         if is_audio_file(user_file):
             await client.send_file(user_chat_id, 'converted_voice.ogg', voice_note=True)
         elif is_video_file(user_file):
             await client.send_file(user_chat_id, 'converted_video.mp4', video_note=True)
         link = get_user_link(user_chat_id) if user_chat_id > 0 else get_group_link(user_chat_id)
-        await event.reply(get_message("send_next_id", language).format(id=link), parse_mode='markdown')
+        send_next_id_message = await event.reply(get_message("send_next_id", language).format(id=link), parse_mode='markdown')
+        processing_messages.append(send_next_id_message.id)
+
+        # Удаляем сообщение об ожидании отправки
+        await client.delete_messages(event.chat_id, sending_message.id)
     except Exception as e:
-        await event.reply(get_message("send_error", language).format(error=e))
+        send_error_message = await event.reply(get_message("send_error", language).format(error=e))
+        processing_messages.append(send_error_message.id)
 
 async def main():
     await client.start()
