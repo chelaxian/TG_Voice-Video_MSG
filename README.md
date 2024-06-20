@@ -36,7 +36,7 @@ This bot allows you to send voice messages and round videos to specified users o
 
 ### Configuration
 
-1. **Create a config.py file:**
+1. **Edit the config.py file to include your own API ID, API Hash, and allowed user ID. Replace the placeholders with your actual values.**
     ```python
     # config.py
 
@@ -84,6 +84,7 @@ This bot allows you to send voice messages and round videos to specified users o
     ```sh
     python3 bot.py
     ```
+    Upon first run, you will be prompted to enter your phone number, the verification code sent to your Telegram, and your password (if 2FA is enabled).
 
 ### Usage
 
