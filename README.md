@@ -37,6 +37,7 @@ This bot allows you to send voice messages and round videos to specified users o
 ### Configuration
 
 1. **Edit the config.py file to include your own API ID, API Hash, and allowed user ID. Replace the placeholders with your actual values.**
+   
     ```python
     # config.py
 
