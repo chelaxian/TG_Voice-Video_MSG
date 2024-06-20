@@ -114,7 +114,7 @@ This bot allows you to send voice messages and round videos to specified users o
 
 - Ensure the bot token and user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user ID specified in the config.py file.
-- For group IDs, use the format `-100xxxxxxxxxx`.
+- For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
 
 ## Supported Languages
 - Russian (RU)
