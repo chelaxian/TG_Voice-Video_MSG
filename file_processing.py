@@ -2,6 +2,8 @@ import os
 import ffmpeg
 import logging
 from moviepy.editor import VideoFileClip, AudioFileClip
+import numpy as np
+from scipy.io import wavfile
 from config import audio_formats, video_formats
 
 # Инициализация логгера
@@ -15,22 +17,48 @@ def is_video_file(file_path):
     logger.info(f"Checking video file format for: {file_path}")
     return file_path.lower().endswith(tuple(video_formats))
 
+def generate_waveform(file_path, output_path='waveform.dat'):
+    try:
+        wav_path = 'temp.wav'
+        ffmpeg.input(file_path).output(wav_path).run(overwrite_output=True)
+
+        samplerate, data = wavfile.read(wav_path)
+        if len(data.shape) > 1:
+            data = np.mean(data, axis=1)
+
+        max_value = np.max(np.abs(data))
+        if max_value > 0:
+            data = data / max_value
+
+        waveform = (data * 127 + 128).astype(np.uint8)
+        waveform = waveform[:960]
+        waveform_bytes = waveform.tobytes()
+
+        with open(output_path, 'wb') as f:
+            f.write(waveform_bytes)
+
+        os.remove(wav_path)
+
+        return waveform_bytes
+    except Exception as e:
+        logger.error(f"Error generating waveform: {e}")
+        return None
+
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
 
-    # Обрезка аудиофайлов до 10 минут (600 секунд) для транскрибации
     if audio.duration > 600:
         audio = audio.subclip(0, 600)
 
-    # Получение метаданных из исходного файла
+    duration = int(audio.duration)
+
     probe = ffmpeg.probe(file_path)
     metadata = {}
     for stream in probe['streams']:
         if stream['codec_type'] == 'audio':
             metadata.update(stream.get('tags', {}))
 
-    # Обновление и добавление новых метаданных
     metadata.update({
         'artist': 'Telegram',
         'title': 'Telegram Voice Message',
@@ -38,7 +66,6 @@ def convert_to_voice(file_path):
         'encoder': 'Lavf58.76.100'
     })
 
-    # Формирование команды ffmpeg
     input_file = ffmpeg.input(file_path)
     audio_output = ffmpeg.output(input_file, output_path,
                                  acodec='libopus',
@@ -49,24 +76,20 @@ def convert_to_voice(file_path):
                                  ar='48000',
                                  ac=1)
 
-    # Добавление метаданных
     for key, value in metadata.items():
         audio_output = audio_output.global_args('-metadata', f'{key}={value}')
 
-    # Добавление комментариев
-    audio_output = audio_output.global_args(
-        '-metadata', 'comment=Telegram Voice Message'
-    )
+    audio_output = audio_output.global_args('-metadata', 'comment=Telegram Voice Message')
 
-    # Выполнение команды ffmpeg
     audio_output.run(overwrite_output=True)
 
-    return output_path
+    waveform = generate_waveform(output_path) if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
+
+    return output_path, waveform, duration
 
 def convert_to_round_video(file_path):
     clip = VideoFileClip(file_path)
 
-    # Обрезка видео до 60 секунд
     if clip.duration > 60:
         clip = clip.subclip(0, 60)
 
@@ -82,9 +105,10 @@ def convert_to_round_video(file_path):
     return output_path
 
 def cleanup_files():
-    for file in ['converted_voice.ogg', 'converted_video.mp4']:
+    for file in ['converted_voice.ogg', 'converted_video.mp4', 'waveform.dat']:
         if os.path.exists(file):
             os.remove(file)
     for file in os.listdir('.'):
         if file.startswith('downloaded_media'):
             os.remove(file)
+
