@@ -1,7 +1,7 @@
 import os
 import ffmpeg
 import logging
-from moviepy.editor import VideoFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 from config import audio_formats, video_formats
 
 # Инициализация логгера
@@ -17,14 +17,30 @@ def is_video_file(file_path):
 
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
+    audio = AudioFileClip(file_path)
+
+    # Обрезка аудиофайлов до 60 минут
+    if audio.duration > 3600:
+        audio = audio.subclip(0, 3600)
+
+    # Конвертация аудио в формат ogg с кодеком opus
     ffmpeg.input(file_path).output(output_path,
-                                   **{'c:a': 'libopus', 'b:a': '64k', 'vbr': 'on',
-                                      'application': 'voip', 'metadata:s:a:0': 'title=Telegram Voice Message',
-                                      'metadata:s:a:0': 'artist=Telegram'}).run(overwrite_output=True)
+                                   acodec='libopus',
+                                   audio_bitrate='64k',
+                                   format='ogg',
+                                   application='voip',
+                                   compression_level=10,
+                                   ar='48000',
+                                   ac=1).run(overwrite_output=True)
     return output_path
 
 def convert_to_round_video(file_path):
     clip = VideoFileClip(file_path)
+
+    # Обрезка видео до 60 секунд
+    if clip.duration > 60:
+        clip = clip.subclip(0, 60)
+
     min_dimension = min(clip.size)
     x_center = (clip.size[0] - min_dimension) // 2
     y_center = (clip.size[1] - min_dimension) // 2
