@@ -101,8 +101,10 @@ The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute
 
 3. **Provide chat/user ID:**
     After the file is processed, the bot will ask for the chat/user ID to send the file to. Enter the chat/user ID.
+    To get user/group ID you can seach any bot in Telegram named like "Get My ID" or similar. For example https://t.me/getmy_idbot
+    Or you can use custom Telegram client like Swiftgram / Nicegram / iMe
 
-4. **Stop the bot:**
+5. **Stop the bot:**
     Send `/STOP_voice-video_bot` to your Telegram "Saved Messages" chat.
 
 ### Obtaining API ID and Hash
