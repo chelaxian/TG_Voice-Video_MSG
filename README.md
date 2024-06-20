@@ -82,10 +82,11 @@ This bot allows you to send voice messages and round videos to specified users o
 ### Running the Bot
 
 1. **Run the bot:**
+   
     ```sh
     python3 bot.py
     ```
-    Upon first run, you will be prompted to enter your phone number, the verification code sent to your Telegram, and your password (if 2FA is enabled).
+    Upon first run, you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled).
 
 ### Usage
 
