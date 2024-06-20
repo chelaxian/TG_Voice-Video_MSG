@@ -1,5 +1,5 @@
 # Voice-Video Telegram Bot
-![image](https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/301977a4-2e5d-48df-ba4b-384b252450af)
+![image](https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/5ceb364e-7f3a-42f8-a7ff-27eedba8bec8)
 
 ## Description
 This bot allows you to send any custom voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages.
