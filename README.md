@@ -2,7 +2,9 @@
 ![image](https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/301977a4-2e5d-48df-ba4b-384b252450af)
 
 ## Description
-This bot allows you to send voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages.
+This bot allows you to send any custom voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages.
+The bot trims the sent video to 1 minute to fit into Telegram's 1 minute limit for video messages.
+The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute limit for voice message transcription.
 
 ## Installation
 
