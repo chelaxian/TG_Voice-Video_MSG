@@ -10,10 +10,12 @@ The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute
 
 ### Prerequisites
 - Python 3.10+
-- ffmpeg
-- moviepy
-- telethon
-- Pillow
+- telethon==1.21.1
+- ffmpeg-python==0.2.0
+- moviepy==1.0.3
+- scipy==1.10.1
+- numpy==1.24.3
+- Pillow==9.3.0
 
 ### Steps
 
