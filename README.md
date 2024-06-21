@@ -4,7 +4,7 @@
 ## Description
 This bot allows you to send any custom voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages.
 The bot trims the sent video to 1 minute to fit into Telegram's 1 minute limit for video messages.
-The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute limit for voice message transcription.
+The bot also can trims sent audio up to 10 minutes (if you want so) to fit within Telegram's 10-minute limit for voice message transcription.
 
 ## Installation
 
@@ -44,44 +44,38 @@ The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute
 1. **Edit the config.py file to include your own API ID, API Hash, and allowed user ID. Replace the placeholders with your actual values.**
    
     ```python
-    # config.py
-
     # Your API ID from my.telegram.org
-    # Ваш API ID с my.telegram.org
-    # 你的API ID在my.telegram.org
     api_id = 'YOUR_API_ID'
 
     # Your API Hash from my.telegram.org
-    # Ваш API Hash с my.telegram.org
-    # 你的API Hash在my.telegram.org
     api_hash = 'YOUR_API_HASH'
 
     # Your Telegram user ID
-    # Ваш Telegram user ID
-    # 你的Telegram用户ID
     allowed_user_id = 'YOUR_USER_ID'
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
-    # Настройка языка: 'RU' для русского, 'EN' для английского, 'CN' для китайского
-    # 语言设置: 'RU' 表示俄语, 'EN' 表示英语, 'CN' 表示中文
-    language = 'RU'
-    #language = 'EN'
+    #language = 'RU'
+    language = 'EN'
     #language = 'CN'
 
     # Maximum file size in megabytes
-    # Максимальный размер файла в мегабайтах
-    # 文件的最大大小(以兆字节为单位)
     max_file_size_mb = 100
 
     # Supported audio formats
-    # Поддерживаемые аудио форматы
-    # 支持的音频格式
-    audio_formats = ['.mp3', '.wav', '.ogg', '.oga', '.m4a']
+    audio_formats = [
+    '.mp3', '.wav', '.ogg', '.oga', '.m4a', '.aac', '.flac', '.alac',
+    '.wma', '.aiff', '.opus', '.amr', '.mka'
+    ]
 
     # Supported video formats
-    # Поддерживаемые видео форматы
-    # 支持的视频格式
-    video_formats = ['.mp4', '.mkv', '.avi', '.mov']
+    video_formats = [
+    '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v',
+    '.mpg', '.mpeg', '.3gp', '.3g2', '.mxf', '.ogv', '.mts', '.m2ts'
+    ]
+
+    # Trim audio to 10 minutes if it's longer
+    trim_audio_to_10_minutes = True
+    #trim_audio_to_10_minutes = False
     ```
 
 ### Running the Bot
