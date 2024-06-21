@@ -102,9 +102,10 @@ The bot truncates sent audio up to 10 minutes to fit within Telegram's 10-minute
     Upload or repost an audio or video file to the "Saved Messages" chat.
 
 3. **Provide chat/user ID:**
-    After the file is processed, the bot will ask for the chat/user ID to send the file to. Enter the chat/user ID.
+    After the file is processed, the bot will send you converted file and ask for the chat/user ID to send the file to. Enter the chat/user ID.
     To get user/group ID you can search any bot in Telegram named like "Get My ID" or similar. For example https://t.me/getmy_idbot
     Or you can use custom Telegram client like Swiftgram / Nicegram / iMe that have this function too.
+    Or you can just stop the bot and repost converted file with turned on option "hide sender name".
 
 5. **Stop the bot:**
     Send `/STOP_voice-video_bot` to your Telegram "Saved Messages" chat.
