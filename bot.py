@@ -2,7 +2,7 @@ import os
 import logging
 import asyncio
 from telethon import TelegramClient, events
-from config import api_id, api_hash, allowed_user_id, language, max_file_size_mb, audio_formats, video_formats
+from config import api_id, api_hash, allowed_user_id, language, max_file_size_mb, audio_formats, video_formats, trim_audio_to_10_minutes
 from messages import get_message, get_user_link, get_group_link
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files
 from telethon.tl.types import DocumentAttributeAudio
@@ -59,7 +59,6 @@ async def stop(event):
     logger.info(f"Bot stopped by user {event.sender_id}. Files cleaned up.")
     processing_messages.append(stop_message.id)
 
-    # Удаляем все сообщения после старта бота
     for msg_id in processing_messages:
         try:
             await client.delete_messages(event.chat_id, msg_id)
