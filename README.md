@@ -10,12 +10,10 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Prerequisites
 - Python 3.10+
-- telethon==1.21.1
-- ffmpeg-python==0.2.0
-- moviepy==1.0.3
-- scipy==1.10.1
-- numpy==1.24.3
-- Pillow==9.3.0
+- telethon
+- ffmpeg-python
+- moviepy
+- numpy
 
 ### Steps
 
