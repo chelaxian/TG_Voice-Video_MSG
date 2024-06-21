@@ -28,6 +28,7 @@ def generate_waveform():
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
+    temp_trimmed_path = None
 
     # Проверяем, нужно ли обрезать аудио
     if trim_audio_to_10_minutes and audio.duration > 600:
@@ -72,7 +73,7 @@ def convert_to_voice(file_path):
     # Генерация случайного waveform для длинных файлов
     waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
 
-    if trim_audio_to_10_minutes and os.path.exists(temp_trimmed_path):
+    if temp_trimmed_path and os.path.exists(temp_trimmed_path):
         os.remove(temp_trimmed_path)
 
     return output_path, waveform, duration
