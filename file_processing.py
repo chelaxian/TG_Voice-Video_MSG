@@ -9,12 +9,28 @@ from config import audio_formats, video_formats, trim_audio_to_10_minutes
 logger = logging.getLogger(__name__)
 
 def is_audio_file(file_path):
-    logger.info(f"Checking audio file format for: {file_path}")
-    return file_path.lower().endswith(tuple(audio_formats))
+    try:
+        logger.info(f"Checking audio file format for: {file_path}")
+        probe = ffmpeg.probe(file_path)
+        for stream in probe['streams']:
+            if stream['codec_type'] == 'audio' and 'video' not in [s['codec_type'] for s in probe['streams']]:
+                return True
+        return False
+    except ffmpeg.Error as e:
+        logger.error(f"ffmpeg error: {e}")
+        return False
 
 def is_video_file(file_path):
-    logger.info(f"Checking video file format for: {file_path}")
-    return file_path.lower().endswith(tuple(video_formats))
+    try:
+        logger.info(f"Checking video file format for: {file_path}")
+        probe = ffmpeg.probe(file_path)
+        for stream in probe['streams']:
+            if stream['codec_type'] == 'video':
+                return True
+        return False
+    except ffmpeg.Error as e:
+        logger.error(f"ffmpeg error: {e}")
+        return False
 
 def generate_waveform():
     try:
@@ -28,8 +44,8 @@ def generate_waveform():
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
-    temp_trimmed_path = None
 
+    temp_trimmed_path = None
     # Проверяем, нужно ли обрезать аудио
     if trim_audio_to_10_minutes and audio.duration > 600:
         audio = audio.subclip(0, 600)
