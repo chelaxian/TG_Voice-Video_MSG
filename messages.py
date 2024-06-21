@@ -89,4 +89,3 @@ messages = {
 
 def get_message(key, language):
     return messages[key][language]
-
