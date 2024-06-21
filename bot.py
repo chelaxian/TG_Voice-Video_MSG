@@ -90,7 +90,7 @@ async def handle_media(event):
     download_message = await event.reply(get_message("processing_download", language))
     processing_messages.append(download_message.id)
 
-    file_ext = os.path.splitext(file.name)[1]
+    file_ext = os.path.splitext(file.name)[1] if file.name else '.ogg'
     downloaded_file_path = await event.message.download_media(file=f'downloaded_media{file_ext}')
     user_file = downloaded_file_path
     logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
@@ -189,4 +189,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-
