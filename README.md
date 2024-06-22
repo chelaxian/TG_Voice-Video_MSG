@@ -14,7 +14,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 - ffmpeg-python
 - moviepy
 - numpy
-- aiogram==2.24 (if you need botfather bot too)
+- aiogram 2.24 (if you need botfather bot too)
 
 ### Steps
 
@@ -124,7 +124,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 4. Create a new application and obtain the `api_id` and `api_hash`.
 
 ### Notes
-- Even for BotFather bot you still need API ID and API HASH because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon.
+- Even for BotFather bot you still need API ID and API HASH because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 )
 - Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user IDs specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
