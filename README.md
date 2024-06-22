@@ -99,10 +99,10 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 ### Usage
 
 1. **Start the bot:**
-    Send `/start_voice_video_bot` to your Telegram "Saved Messages" chat.
+    Send `/start_voice_video_bot` to your Telegram "Saved Messages" chat or to public bot.
 
 2. **Send a file:**
-    Upload or repost an audio or video file to the "Saved Messages" chat.
+    Upload or repost an audio or video file to the "Saved Messages" chat or to public bot.
 
 3. **Provide chat/user ID:**
     After the file is processed, the bot will send you converted file and ask for the chat/user ID to send the file to. Enter the chat/user ID.
@@ -114,7 +114,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     Or you can just stop the bot and repost converted file with turned on option "hide sender name".
 
 5. **Stop the bot:**
-    Send `/stop_voice_video_bot` to your Telegram "Saved Messages" chat.
+    Send `/stop_voice_video_bot` to your Telegram "Saved Messages" chat or to public bot.
 
 
 ### Obtaining API ID and Hash (and BotFather token)
