@@ -8,8 +8,8 @@ api_id = 'YOUR_API_ID'
 # 您从 my.telegram.org 获取的 API Hash
 api_hash = 'YOUR_API_HASH'
 
-# BotFather token if needed
-# Токен BotFather, если необходимо
+# BotFather token (fill in if needed)
+# Токен BotFather, (заполните, если необходимо)
 # BotFather 令牌，如果需要的话
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
