@@ -2,7 +2,7 @@
 ![image](https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/5ceb364e-7f3a-42f8-a7ff-27eedba8bec8)
 
 ## Description
-This bot allows you to convert any video and audio files and send it as custom voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages. Bot can work in your Saved Messages or like normal public bot.
+This bot allows you to repost/upload any custom video and audio files and send it as telegram's voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages. Bot can works privately in your Saved Messages or like normal public bot.
 The bot trims the sent video to 1 minute to fit into Telegram's 1 minute limit for video messages.
 The bot also can trims sent audio up to 10 minutes (if you want so) to fit within Telegram's 10-minute limit for voice message transcription.
 
