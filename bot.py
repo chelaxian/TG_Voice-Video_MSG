@@ -29,7 +29,7 @@ async def send_welcome_message():
 @client.on(events.NewMessage(pattern='/start_voice_video_bot'))
 async def start(event):
     global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
-    if str(event.sender_id) != allowed_user_id:
+    if str(event.sender_id) not in allowed_user_id:
         logger.warning(f"User {event.sender_id} attempted to use the bot without access.")
         return
 
@@ -47,7 +47,7 @@ async def start(event):
 @client.on(events.NewMessage(pattern='/stop_voice_video_bot'))
 async def stop(event):
     global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
-    if str(event.sender_id) != allowed_user_id:
+    if str(event.sender_id) not in allowed_user_id:
         return
 
     bot_active = False
@@ -66,7 +66,7 @@ async def stop(event):
             logger.error(f"Error deleting message {msg_id}: {e}")
     processing_messages = []
 
-@client.on(events.NewMessage(func=lambda e: str(e.sender_id) == allowed_user_id and bot_active and e.chat_id == int(allowed_user_id) and e.file))
+@client.on(events.NewMessage(func=lambda e: str(e.sender_id) in allowed_user_id and bot_active and str(e.chat_id) in allowed_user_id and e.file))
 async def handle_media(event):
     global user_file, downloaded_file_path, awaiting_id, processing_messages
     logger.info(f"Received file from user {event.sender_id}")
@@ -135,7 +135,7 @@ async def handle_media(event):
 
     await client.delete_messages(event.chat_id, processing_message.id)
 
-@client.on(events.NewMessage(func=lambda e: str(e.sender_id) == allowed_user_id and bot_active and e.chat_id == int(allowed_user_id) and not e.file))
+@client.on(events.NewMessage(func=lambda e: str(e.sender_id) in allowed_user_id and bot_active and str(e.chat_id) in allowed_user_id and not e.file))
 async def handle_id(event):
     global user_chat_id, user_file, awaiting_id, processing_messages
     if not awaiting_id:
