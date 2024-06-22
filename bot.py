@@ -26,7 +26,7 @@ async def send_welcome_message():
     await client.send_message(me.id, welcome_message, parse_mode='markdown', silent=True)
     await client.pin_message(me.id, (await client.get_messages(me.id, limit=1))[0].id)
 
-@client.on(events.NewMessage(pattern='/START_voice-video_bot'))
+@client.on(events.NewMessage(pattern='/START_voice_video_bot'))
 async def start(event):
     global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
     if str(event.sender_id) != allowed_user_id:
@@ -38,13 +38,13 @@ async def start(event):
     user_chat_id = None
     awaiting_id = False
     processing_messages = []
-    logger.info(f"Received /START_voice-video_bot command from user {event.sender_id}")
+    logger.info(f"Received /START_voice_video_bot command from user {event.sender_id}")
     start_message = await event.reply(get_message("start", language))
     processing_messages.append(start_message.id)
     send_file_message = await event.reply(get_message("send_file", language))
     processing_messages.append(send_file_message.id)
 
-@client.on(events.NewMessage(pattern='/STOP_voice-video_bot'))
+@client.on(events.NewMessage(pattern='/STOP_voice_video_bot'))
 async def stop(event):
     global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
     if str(event.sender_id) != allowed_user_id:
