@@ -94,7 +94,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     python3 botfather.py
     ```
     
-    Upon first run, you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled).
+    Upon first run, for `bot.py` you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled). for `botfather.py` it is no needed.
 
 ### Usage
 
