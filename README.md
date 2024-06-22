@@ -49,7 +49,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     # Your API Hash from my.telegram.org
     api_hash = 'YOUR_API_HASH'
 
-    # BotFather token (fill if you need public bot too)
+    # BotFather token (fill in if you need public bot too)
     botfather_token = 'YOUR_BOTFATHER_TOKEN'
     
     # Your Telegram user ID and allowed user IDs (delete others if no need)
@@ -116,13 +116,14 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 5. **Stop the bot:**
     Send `/stop_voice_video_bot` to your Telegram "Saved Messages" chat.
 
-### Obtaining API ID and Hash
+
+### Obtaining API ID and Hash (and BotFather token)
 
 1. Go to [my.telegram.org](https://my.telegram.org).
 2. Log in with your phone number and login code.
 3. Go to the API development tools section.
 4. Create a new application and obtain the `api_id` and `api_hash`.
-
+5. For BotFather bot and token use telegram bot - @BotFather
 ### Notes
 - Even for BotFather bot you still need API ID and API HASH because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 )
 - Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
