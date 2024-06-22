@@ -8,14 +8,14 @@ api_id = 'YOUR_API_ID'
 # 您从 my.telegram.org 获取的 API Hash
 api_hash = 'YOUR_API_HASH'
 
-# BotFather token
-# Токен BotFather
+# BotFather token if needed
+# Токен BotFather, если необходимо
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-# Your Telegram user ID
-# Ваш Telegram user ID
-# 您的 Telegram 用户 ID
-allowed_user_id = 'YOUR_USER_ID'
+# Your Telegram user ID and allowed user IDs
+# Ваш Telegram user ID и разрешенные user ID
+# 您的 Telegram 用户 ID 和允许的用户 ID
+allowed_user_id = ['YOUR_USER_ID', 'USER_ID2']
 
 # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
 # Настройка языка: 'RU' для русского, 'EN' для английского, 'CN' для китайского
