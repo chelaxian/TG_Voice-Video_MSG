@@ -14,6 +14,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 - ffmpeg-python
 - moviepy
 - numpy
+- aiogram==2.24 (if you need botfather bot too)
 
 ### Steps
 
@@ -48,8 +49,11 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     # Your API Hash from my.telegram.org
     api_hash = 'YOUR_API_HASH'
 
-    # Your Telegram user ID
-    allowed_user_id = 'YOUR_USER_ID'
+    # BotFather token (fill if you need public bot too)
+    botfather_token = 'YOUR_BOTFATHER_TOKEN'
+    
+    # Your Telegram user ID and allowed user IDs (delete others if no need)
+    allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
     #language = 'RU'
@@ -78,17 +82,24 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Running the Bot
 
-1. **Run the bot:**
+1. **Run the personal bot:**
    
     ```sh
     python3 bot.py
     ```
+    
+    or if you need public bot:
+   
+    ```sh
+    python3 botfather.py
+    ```
+    
     Upon first run, you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled).
 
 ### Usage
 
 1. **Start the bot:**
-    Send `/START_voice-video_bot` to your Telegram "Saved Messages" chat.
+    Send `/start_voice_video_bot` to your Telegram "Saved Messages" chat.
 
 2. **Send a file:**
     Upload or repost an audio or video file to the "Saved Messages" chat.
@@ -103,7 +114,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     Or you can just stop the bot and repost converted file with turned on option "hide sender name".
 
 5. **Stop the bot:**
-    Send `/STOP_voice-video_bot` to your Telegram "Saved Messages" chat.
+    Send `/stop_voice_video_bot` to your Telegram "Saved Messages" chat.
 
 ### Obtaining API ID and Hash
 
@@ -113,9 +124,9 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 4. Create a new application and obtain the `api_id` and `api_hash`.
 
 ### Notes
-- No BotFather token needed! Works with your Telegram account directly! 
+- Even for BotFather bot you still need API ID and API HASH because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon.
 - Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
-- The bot only responds to commands from the allowed user ID specified in the config.py file.
+- The bot only responds to commands from the allowed user IDs specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
 
 ## Supported Languages
