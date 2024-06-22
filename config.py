@@ -8,6 +8,10 @@ api_id = 'YOUR_API_ID'
 # 您从 my.telegram.org 获取的 API Hash
 api_hash = 'YOUR_API_HASH'
 
+# BotFather token
+# Токен BotFather
+botfather_token = 'YOUR_BOTFATHER_TOKEN'
+
 # Your Telegram user ID
 # Ваш Telegram user ID
 # 您的 Telegram 用户 ID
