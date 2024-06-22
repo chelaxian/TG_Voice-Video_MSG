@@ -28,6 +28,7 @@ async def start_telethon_client():
 asyncio.get_event_loop().run_until_complete(start_telethon_client())
 
 user_file_path = None
+service_message_ids = []
 
 def generate_waveform():
     # Генерация случайной waveform
@@ -38,21 +39,31 @@ def generate_waveform():
 async def start(message: types.Message):
     global user_file_path
     user_file_path = None
-    await message.reply(get_message("start", language))
-    await message.reply(get_message("send_file", language))
+    msg1 = await message.reply(get_message("start", language))
+    msg2 = await message.reply(get_message("send_file", language))
+    service_message_ids.extend([msg1.message_id, msg2.message_id])
 
 @dp.message_handler(commands=['stop_voice_video_bot'])
 async def stop(message: types.Message):
     global user_file_path
     user_file_path = None
-    await message.reply(get_message("stop", language))
+    msg = await message.reply(get_message("stop", language))
+    service_message_ids.append(msg.message_id)
+    
+    for msg_id in service_message_ids:
+        try:
+            await bot.delete_message(message.chat.id, msg_id)
+        except Exception as e:
+            logging.error(f"Error deleting message {msg_id}: {e}")
+    service_message_ids.clear()
 
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
 async def handle_media(message: types.Message):
     global user_file_path
     file = await message.document.download(destination_dir='videos') if message.document else await message.video.download(destination_dir='videos') if message.video else await message.audio.download(destination_dir='videos')
     user_file_path = file.name
-    await message.reply(get_message("processing_download", language))
+    msg = await message.reply(get_message("processing_download", language))
+    service_message_ids.append(msg.message_id)
     
     try:
         if is_audio_file(user_file_path):
@@ -89,17 +100,21 @@ async def handle_media(message: types.Message):
                 )
             os.remove(output_file)  # Clean up the converted file
         else:
-            await message.reply(get_message("invalid_format", language))
+            msg = await message.reply(get_message("invalid_format", language))
+            service_message_ids.append(msg.message_id)
             user_file_path = None
             return
     except KeyError as e:
-        await message.reply(f"Missing key in messages: {e}")
+        msg = await message.reply(f"Missing key in messages: {e}")
+        service_message_ids.append(msg.message_id)
     except Exception as e:
-        await message.reply(f"Error processing file: {e}")
+        msg = await message.reply(f"Error processing file: {e}")
+        service_message_ids.append(msg.message_id)
         user_file_path = None
         return
 
-    await message.reply(get_message("send_file", language))
+    msg = await message.reply(get_message("send_file", language))
+    service_message_ids.append(msg.message_id)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
