@@ -40,7 +40,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Configuration
 
-1. **Edit the config.py file to include your own API ID, API Hash, and allowed user ID. Replace the placeholders with your actual values.**
+1. **Edit the config.py file to include your own API ID, API Hash, and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
    
     ```python
     # Your API ID from my.telegram.org
