@@ -9,7 +9,7 @@ api_id = 'YOUR_API_ID'
 api_hash = 'YOUR_API_HASH'
 
 # BotFather token (fill in if needed)
-# Токен BotFather, (заполните, если необходимо)
+# Токен BotFather(заполните, если необходимо)
 # BotFather 令牌，如果需要的话
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
