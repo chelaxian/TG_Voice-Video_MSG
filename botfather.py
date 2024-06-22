@@ -56,7 +56,6 @@ async def handle_media(message: types.Message):
     
     try:
         if is_audio_file(user_file_path):
-            await message.reply(get_message("send_file", language))
             output_file, waveform, duration = convert_to_voice(user_file_path)
             waveform_data = generate_waveform()
             if os.path.getsize(output_file) > 1 * 1024 * 1024 or duration > 120:
@@ -81,7 +80,6 @@ async def handle_media(message: types.Message):
                 )
             os.remove(output_file)  # Clean up the converted file
         elif is_video_file(user_file_path):
-            await message.reply(get_message("send_file", language))
             output_file = convert_to_round_video(user_file_path)
             async with telethon_client:
                 await telethon_client.send_file(
@@ -98,6 +96,8 @@ async def handle_media(message: types.Message):
         await message.reply(f"Missing key in messages: {e}")
     except Exception as e:
         await message.reply(f"Error processing file: {e}")
+        user_file_path = None
+        return
 
     await message.reply(get_message("send_file", language))
 
