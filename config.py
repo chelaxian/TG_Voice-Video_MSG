@@ -10,6 +10,7 @@ api_hash = 'YOUR_API_HASH'
 
 # BotFather token if needed
 # Токен BotFather, если необходимо
+# BotFather 令牌，如果需要的话
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
 # Your Telegram user ID and allowed user IDs (delete others if no need)
