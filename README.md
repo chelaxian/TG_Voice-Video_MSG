@@ -136,7 +136,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 5. For BotFather bot and token use telegram bot - @BotFather
    
 ### Notes
-- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon can inject waveform into voice messages bigger than 1 mb ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). API ID and API HASH are requirements for telethon. if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon and numpy python modules.
+- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon/pyrogram can inject waveform into voice messages bigger than 1 mb ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). API ID and API HASH are requirements for telethon. if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon and numpy python modules.
 - Ensure the API ID / Hash (or BotFather token) and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user IDs specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
