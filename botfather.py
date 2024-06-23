@@ -39,8 +39,8 @@ def generate_waveform():
 
 async def set_commands():
     commands = [
-        BotCommand(command="/start_voice_video_bot", description="Start the voice and video processing bot"),
-        BotCommand(command="/stop_voice_video_bot", description="Stop the voice and video processing bot")
+        BotCommand(command="/start_voice_video_bot", description=get_message("command_start_description", language)),
+        BotCommand(command="/stop_voice_video_bot", description=get_message("command_stop_description", language))
     ]
     await bot.set_my_commands(commands)
 
