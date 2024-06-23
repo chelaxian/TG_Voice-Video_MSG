@@ -1,6 +1,5 @@
 import logging
 import os
-import numpy as np
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
@@ -17,6 +16,7 @@ bot = Bot(token=botfather_token)
 dp = Dispatcher(bot)
 
 if add_random_waveform:
+    import numpy as np
     from telethon import TelegramClient
     from telethon.tl.types import DocumentAttributeAudio
 
