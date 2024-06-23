@@ -13,8 +13,8 @@ api_hash = 'YOUR_API_HASH'
 # BotFather 令牌，如果需要的话
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-# Add random waveform to audio files
-# Добавить случайную волнаформу к аудиофайлам
+# Add random waveform to voice messages
+# Добавить случайную спектрограмму аудиодорожки к голосовым сообщениям
 # 如果需要为音频文件添加随机波形图
 add_random_waveform = True
 #add_random_waveform = False
