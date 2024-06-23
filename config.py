@@ -13,6 +13,12 @@ api_hash = 'YOUR_API_HASH'
 # BotFather 令牌，如果需要的话
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
+# Add random waveform to audio files
+# Добавить случайную волнаформу к аудиофайлам
+# 如果需要为音频文件添加随机波形图
+add_random_waveform = True
+#add_random_waveform = False
+
 # Your Telegram user ID and allowed user IDs (delete others if no need)
 # Ваш Telegram user ID и разрешенные user ID (сотрите лишние, если не нужны)
 # 您的 Telegram 用户 ID 和允许的用户 ID（如果不需要，请删除其他的）
