@@ -9,14 +9,14 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 ## Installation
 
 ### Prerequisites
-- Python 3.10+
-- ffmpeg-python
-- moviepy
+- `Python 3.10+`
+- `ffmpeg-python`
+- `moviepy`
   
-- telethon (if you need private bot in your Saved Messages or if you want to add random waveform to voice messages)
+- `telethon` (if you need private bot in your Saved Messages or if you want to add random waveform to voice messages)
 - numpy (if you want to add random waveform to voice messages)
   
-- aiogram 2.24 (if you need botfather public bot)
+- `aiogram 2.24` (if you need botfather public bot)
 
 ### Steps
 
@@ -42,7 +42,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Configuration
 
-1. **Edit the config.py file to include your own API ID, API Hash (you can leave them empty if you have no plan to use telethon), and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
+1. **Edit the config.py file to include your own API ID, API Hash (you can leave them empty if you have no plans to use telethon), and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
    
     ```python
     # Your API ID from my.telegram.org
@@ -58,7 +58,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     add_random_waveform = True
     #add_random_waveform = False
     
-    # Your Telegram user ID and allowed user IDs (delete others if no need)
+    # Your Telegram user ID and allowed user IDs (delete others if not needed)
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
@@ -100,7 +100,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     python3 botfather.py
     ```
     
-    Upon first run, for `bot.py` you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled). for `botfather.py` it is no needed.
+    Upon first run, for `bot.py` you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled). for `botfather.py` it is not needed.
 
 ### Usage
 
@@ -132,8 +132,8 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 5. For BotFather bot and token use telegram bot - @BotFather
    
 ### Notes
-- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon.
-- Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
+- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon and numpy python modules.
+- Ensure the API ID / Hash (or BotFather token) and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user IDs specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
 
