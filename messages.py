@@ -84,6 +84,16 @@ messages = {
         "RU": "Отправка файла. Пожалуйста, подождите...",
         "EN": "Sending the file. Please wait...",
         "CN": "正在发送文件。请稍候..."
+    },
+    "command_start_description": {
+        "RU": "Запустить бота для обработки голосовых сообщений и видео",
+        "EN": "Start the voice and video processing bot",
+        "CN": "启动语音和视频处理机器人"
+    },
+    "command_stop_description": {
+        "RU": "Остановить бота для обработки голосовых сообщений и видео",
+        "EN": "Stop the voice and video processing bot",
+        "CN": "停止语音和视频处理机器人"
     }
 }
 
