@@ -5,9 +5,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile
-from telethon import TelegramClient
-from telethon.tl.types import DocumentAttributeAudio
-from config import botfather_token, api_id, api_hash, language
+from config import botfather_token, api_id, api_hash, language, add_random_waveform
 from messages import get_message
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video
 
@@ -18,14 +16,18 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=botfather_token)
 dp = Dispatcher(bot)
 
-# Initialize telethon client with bot token
-session_name = 'bot_session'
-telethon_client = TelegramClient(session_name, api_id, api_hash)
+if add_random_waveform:
+    from telethon import TelegramClient
+    from telethon.tl.types import DocumentAttributeAudio
 
-async def start_telethon_client():
-    await telethon_client.start(bot_token=botfather_token)
+    # Initialize telethon client with bot token
+    session_name = 'bot_session'
+    telethon_client = TelegramClient(session_name, api_id, api_hash)
 
-asyncio.get_event_loop().run_until_complete(start_telethon_client())
+    async def start_telethon_client():
+        await telethon_client.start(bot_token=botfather_token)
+
+    asyncio.get_event_loop().run_until_complete(start_telethon_client())
 
 user_file_path = None
 service_message_ids = []
@@ -68,8 +70,8 @@ async def handle_media(message: types.Message):
     try:
         if is_audio_file(user_file_path):
             output_file, waveform, duration = convert_to_voice(user_file_path)
-            waveform_data = generate_waveform()
-            if os.path.getsize(output_file) > 1 * 1024 * 1024 or duration > 120:
+            if add_random_waveform:
+                waveform_data = generate_waveform()
                 async with telethon_client:
                     await telethon_client.send_file(
                         message.chat.id,
@@ -92,12 +94,10 @@ async def handle_media(message: types.Message):
             os.remove(output_file)  # Clean up the converted file
         elif is_video_file(user_file_path):
             output_file = convert_to_round_video(user_file_path)
-            async with telethon_client:
-                await telethon_client.send_file(
-                    message.chat.id,
-                    file=output_file,
-                    video_note=True
-                )
+            await bot.send_video_note(
+                chat_id=message.chat.id,
+                video_note=InputFile(output_file)
+            )
             os.remove(output_file)  # Clean up the converted file
         else:
             msg = await message.reply(get_message("invalid_format", language))
