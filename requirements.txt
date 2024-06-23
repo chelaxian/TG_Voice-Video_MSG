@@ -1,7 +1,7 @@
 ffmpeg-python==0.2.0
 moviepy==1.0.3
 numpy==1.24.3
-#if botfather no needed you can comment or delete aiogram
+#if botfather not needed you can comment or delete aiogram
 aiogram==2.24
-#if you don't need private bot in Saved Messages and don't want to add waveform to big voice messages - you can commebt or delete telethon
+#if you don't need private bot in Saved Messages and don't want to add waveform to big voice messages - you can comment or delete telethon
 telethon==1.27.0
