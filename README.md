@@ -57,6 +57,10 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     # Add random waveform to audio files
     add_random_waveform = True
     #add_random_waveform = False
+
+    # Allow all users to interact with the bot
+    #allow_all_users = True
+    allow_all_users = False
     
     # Your Telegram user ID and allowed user IDs (delete others if not needed)
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
