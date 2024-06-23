@@ -10,10 +10,11 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Prerequisites
 - Python 3.10+
-- telethon
 - ffmpeg-python
 - moviepy
 - numpy
+  
+- telethon (if you want to add random waveform to voice messages) 
 - aiogram 2.24 (if you need botfather bot too)
 
 ### Steps
@@ -40,7 +41,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Configuration
 
-1. **Edit the config.py file to include your own API ID, API Hash, and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
+1. **Edit the config.py file to include your own API ID, API Hash (you can leave them empty if you have no plan to use telethon), and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
    
     ```python
     # Your API ID from my.telegram.org
@@ -51,6 +52,10 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
     # BotFather token (fill in if you need public bot too)
     botfather_token = 'YOUR_BOTFATHER_TOKEN'
+
+    # Add random waveform to audio files
+    add_random_waveform = True
+    #add_random_waveform = False
     
     # Your Telegram user ID and allowed user IDs (delete others if no need)
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
@@ -124,8 +129,9 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 3. Go to the API development tools section.
 4. Create a new application and obtain the `api_id` and `api_hash`.
 5. For BotFather bot and token use telegram bot - @BotFather
+   
 ### Notes
-- Even for BotFather bot you still need API ID and API HASH because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 )
+- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon can inject waveform into voice messages bigger than 1 mb. API ID and API HASH are requirements for telethon. ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon.
 - Ensure the API ID / Hash and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user IDs specified in the config.py file.
 - For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
