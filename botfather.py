@@ -1,9 +1,10 @@
 import logging
 import os
+import numpy as np
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
-from aiogram.types import ContentType, InputFile
+from aiogram.types import ContentType, InputFile, BotCommand
 from config import botfather_token, api_id, api_hash, language, add_random_waveform
 from messages import get_message
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video
@@ -16,7 +17,6 @@ bot = Bot(token=botfather_token)
 dp = Dispatcher(bot)
 
 if add_random_waveform:
-    import numpy as np
     from telethon import TelegramClient
     from telethon.tl.types import DocumentAttributeAudio
 
@@ -36,6 +36,13 @@ def generate_waveform():
     # Генерация случайной waveform
     waveform = np.random.randint(0, 256, size=80, dtype=np.uint8)
     return waveform.tobytes()
+
+async def set_commands():
+    commands = [
+        BotCommand(command="/start_voice_video_bot", description="Start the voice and video processing bot"),
+        BotCommand(command="/stop_voice_video_bot", description="Stop the voice and video processing bot")
+    ]
+    await bot.set_my_commands(commands)
 
 @dp.message_handler(commands=['start_voice_video_bot'])
 async def start(message: types.Message):
@@ -117,4 +124,6 @@ async def handle_media(message: types.Message):
     service_message_ids.append(msg.message_id)
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(set_commands())
     executor.start_polling(dp, skip_updates=True)
