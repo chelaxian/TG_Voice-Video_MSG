@@ -4,7 +4,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile, BotCommand
-from config import botfather_token, api_id, api_hash, language, add_random_waveform, allow_all_users, allowed_user_id
+from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id
 from messages import get_message
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video
 
@@ -19,6 +19,7 @@ if add_random_waveform:
     import numpy as np
     from telethon import TelegramClient
     from telethon.tl.types import DocumentAttributeAudio
+    from config import api_id, api_hash
 
     # Initialize telethon client with bot token
     session_name = 'bot_session'
