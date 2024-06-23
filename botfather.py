@@ -31,6 +31,7 @@ if add_random_waveform:
 
 user_file_path = None
 service_message_ids = []
+bot_active = False  # Глобальная переменная для отслеживания состояния бота
 
 def generate_waveform():
     # Генерация случайной waveform
@@ -46,10 +47,11 @@ async def set_commands():
 
 @dp.message_handler(commands=['start_voice_video_bot'])
 async def start(message: types.Message):
+    global user_file_path, bot_active
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    global user_file_path
+    bot_active = True  # Включаем бота
     user_file_path = None
     msg1 = await message.reply(get_message("start", language))
     msg2 = await message.reply(get_message("send_file", language))
@@ -57,10 +59,11 @@ async def start(message: types.Message):
 
 @dp.message_handler(commands=['stop_voice_video_bot'])
 async def stop(message: types.Message):
+    global user_file_path, bot_active
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    global user_file_path
+    bot_active = False  # Останавливаем бота
     user_file_path = None
     msg = await message.reply(get_message("stop", language))
     service_message_ids.append(msg.message_id)
@@ -74,10 +77,13 @@ async def stop(message: types.Message):
 
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
 async def handle_media(message: types.Message):
+    global user_file_path
+    if not bot_active:
+        return  # Игнорируем сообщения, если бот не активен
+
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    global user_file_path
     file = await message.document.download(destination_dir='videos') if message.document else await message.video.download(destination_dir='videos') if message.video else await message.audio.download(destination_dir='videos')
     user_file_path = file.name
     msg = await message.reply(get_message("processing_download", language))
