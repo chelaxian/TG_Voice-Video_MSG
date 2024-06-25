@@ -112,9 +112,13 @@ def convert_to_round_video(file_path):
     return output_path
 
 def cleanup_files():
+    # Удаление известных временных файлов
     for file in ['converted_voice.ogg', 'converted_video.mp4', 'waveform.dat']:
         if os.path.exists(file):
             os.remove(file)
-    for file in os.listdir('.'):
-        if file.startswith('downloaded_media'):
-            os.remove(file)
+    # Удаление всех поддерживаемых аудио и видео файлов в директории videos
+    supported_formats = audio_formats + video_formats
+    for root, dirs, files in os.walk('videos'):
+        for file in files:
+            if any(file.endswith(ext) for ext in supported_formats):
+                os.remove(os.path.join(root, file))
