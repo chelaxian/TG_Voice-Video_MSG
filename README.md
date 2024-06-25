@@ -54,7 +54,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     # BotFather token (provide if you need public bot)
     botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-    # Add random waveform to audio files (enable / disable using telethon and numpy)
+    # Add random waveform to audio files (enable / disable using telethon and numpy) (not used in bot.py)
     add_random_waveform = True
     #add_random_waveform = False
 
@@ -62,7 +62,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     trim_audio_to_10_minutes = True
     #trim_audio_to_10_minutes = False
 
-    # Allow all users to interact with the bot
+    # Allow all users to interact with the bot (not used in bot.py)
     #allow_all_users = True
     allow_all_users = False
     
