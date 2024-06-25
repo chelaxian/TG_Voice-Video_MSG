@@ -32,6 +32,7 @@ if add_random_waveform:
 
 user_file_path = None
 service_message_ids = []
+media_message_ids = []
 bot_active = False  # Глобальная переменная для отслеживания состояния бота
 
 def generate_waveform():
@@ -79,7 +80,7 @@ async def stop(message: types.Message):
 
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
 async def handle_media(message: types.Message):
-    global user_file_path
+    global user_file_path, bot_active, service_message_ids
     if not bot_active:
         return  # Игнорируем сообщения, если бот не активен
 
@@ -110,6 +111,7 @@ async def handle_media(message: types.Message):
     try:
         if is_audio_file(user_file_path):
             output_file, waveform, duration = convert_to_voice(user_file_path)
+            await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
             if add_random_waveform:
                 waveform_data = generate_waveform()
                 async with telethon_client:
@@ -126,24 +128,28 @@ async def handle_media(message: types.Message):
                         ]
                     )
             else:
-                await bot.send_voice(
+                media_msg = await bot.send_voice(
                     chat_id=message.chat.id,
                     voice=InputFile(output_file),
                     duration=duration
                 )
+                media_message_ids.append(media_msg.message_id)
             os.remove(output_file)  # Clean up the converted file
         elif is_video_file(user_file_path):
             output_file = convert_to_round_video(user_file_path)
-            await bot.send_video_note(
+            await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
+            media_msg = await bot.send_video_note(
                 chat_id=message.chat.id,
                 video_note=InputFile(output_file)
             )
+            media_message_ids.append(media_msg.message_id)
             os.remove(output_file)  # Clean up the converted file
         else:
-            msg = await message.reply(get_message("invalid_format", language))
+            msg = await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("invalid_format", language))
             service_message_ids.append(msg.message_id)
             user_file_path = None
             return
+        await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
     except KeyError as e:
         msg = await message.reply(f"Missing key in messages: {e}")
         service_message_ids.append(msg.message_id)
