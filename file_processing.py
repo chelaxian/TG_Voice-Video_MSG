@@ -119,7 +119,7 @@ def cleanup_files():
 
     # Удаление всех поддерживаемых аудио и видео файлов в директории videos
     supported_formats = [ext.lower() for ext in audio_formats + video_formats]
-    for root, dirs, files in os.walk('videos'):
+    for root, dirs, files in os.walk('files'):
         for file in files:
             if any(file.lower().endswith(ext) for ext in supported_formats):
                 os.remove(os.path.join(root, file))
