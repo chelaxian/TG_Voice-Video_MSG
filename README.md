@@ -66,7 +66,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     #allow_all_users = True
     allow_all_users = False
     
-    # Your Telegram user ID and allowed user IDs (delete/ignore others if not needed)
+    # Your Telegram user ID and allowed user IDs (provide your ID and delete/ignore others if not needed)
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
