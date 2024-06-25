@@ -116,9 +116,10 @@ def cleanup_files():
     for file in ['converted_voice.ogg', 'converted_video.mp4', 'waveform.dat']:
         if os.path.exists(file):
             os.remove(file)
+
     # Удаление всех поддерживаемых аудио и видео файлов в директории videos
-    supported_formats = audio_formats + video_formats
+    supported_formats = [ext.lower() for ext in audio_formats + video_formats]
     for root, dirs, files in os.walk('videos'):
         for file in files:
-            if any(file.endswith(ext) for ext in supported_formats):
+            if any(file.lower().endswith(ext) for ext in supported_formats):
                 os.remove(os.path.join(root, file))
