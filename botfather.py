@@ -85,7 +85,7 @@ async def handle_media(message: types.Message):
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    file = await message.document.download(destination_dir='videos') if message.document else await message.video.download(destination_dir='videos') if message.video else await message.audio.download(destination_dir='videos')
+    file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
     user_file_path = file.name
     msg = await message.reply(get_message("processing_download", language))
     service_message_ids.append(msg.message_id)
