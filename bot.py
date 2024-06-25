@@ -7,8 +7,7 @@ from messages import get_message, get_user_link, get_group_link
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files
 from telethon.tl.types import DocumentAttributeAudio
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 client = TelegramClient('anon_session', api_id, api_hash)
@@ -89,8 +88,13 @@ async def handle_media(event):
     download_message = await event.reply(get_message("processing_download", language))
     processing_messages.append(download_message.id)
 
-    file_ext = os.path.splitext(file.name)[1] if file.name else '.ogg'
-    downloaded_file_path = await event.message.download_media(file=f'downloaded_media{file_ext}')
+    file_ext = os.path.splitext(file.name)[1].lower() if file.name else '.ogg'
+    destination_dir = 'files/music' if file_ext in audio_formats else 'files/videos'
+    
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir)
+
+    downloaded_file_path = await event.message.download_media(file=os.path.join(destination_dir, f'downloaded_media{file_ext}'))
     user_file = downloaded_file_path
     logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
 
@@ -102,7 +106,6 @@ async def handle_media(event):
     processing_messages.append(processing_message.id)
 
     try:
-        logger.info(f"Checking if file is audio: {downloaded_file_path}")
         if is_audio_file(downloaded_file_path):
             logger.info("File is an audio file, converting to voice message.")
             output_file, waveform, duration = convert_to_voice(downloaded_file_path)
