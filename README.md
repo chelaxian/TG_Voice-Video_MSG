@@ -13,7 +13,7 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 - `ffmpeg-python`
 - `moviepy`
   
-- `telethon` (if you need private bot in your Saved Messages or if you want to add random waveform to voice messages)
+- `telethon` (if you need private bot in your Saved Messages or if you want to add waveform to big voice messages)
 - `numpy` (if you want to add random waveform to voice messages)
   
 - `aiogram 2.24` (if you need botfather public bot)
