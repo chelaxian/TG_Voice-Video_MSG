@@ -45,24 +45,28 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 1. **Edit the config.py file to include your own API ID, API Hash (you can leave them empty if you have no plans to use telethon), and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
    
     ```python
-    # Your API ID from my.telegram.org
+    # Your API ID from my.telegram.org (provide if you need private bot or want big audio to have waveform)
     api_id = 'YOUR_API_ID'
 
-    # Your API Hash from my.telegram.org
+    # Your API Hash from my.telegram.org (provide if you need private bot or want big audio to have waveform)
     api_hash = 'YOUR_API_HASH'
 
-    # BotFather token (fill in if you need public bot too)
+    # BotFather token (provide if you need public bot)
     botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-    # Add random waveform to audio files
+    # Add random waveform to audio files (enable / disable using telethon and numpy)
     add_random_waveform = True
     #add_random_waveform = False
+
+    # Trim audio to 10 minutes if it's longer (enable / disable long audio trimming)
+    trim_audio_to_10_minutes = True
+    #trim_audio_to_10_minutes = False
 
     # Allow all users to interact with the bot
     #allow_all_users = True
     allow_all_users = False
     
-    # Your Telegram user ID and allowed user IDs (delete others if not needed)
+    # Your Telegram user ID and allowed user IDs (delete/ignore others if not needed)
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
@@ -70,24 +74,20 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
     language = 'EN'
     #language = 'CN'
 
-    # Maximum file size in megabytes
+    # Maximum file size in megabytes (adjust size as you need)
     max_file_size_mb = 100
 
-    # Supported audio formats
+    # Supported audio formats (you can limit formats if you want to)
     audio_formats = [
     '.mp3', '.wav', '.ogg', '.oga', '.m4a', '.aac', '.flac', '.alac',
     '.wma', '.aiff', '.opus', '.amr', '.mka'
     ]
 
-    # Supported video formats
+    # Supported video formats (you can limit formats if you want to)
     video_formats = [
     '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v',
     '.mpg', '.mpeg', '.3gp', '.3g2', '.mxf', '.ogv', '.mts', '.m2ts'
     ]
-
-    # Trim audio to 10 minutes if it's longer
-    trim_audio_to_10_minutes = True
-    #trim_audio_to_10_minutes = False
     ```
 
 ### Running the Bot
