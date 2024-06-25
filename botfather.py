@@ -4,9 +4,9 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile, BotCommand
-from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id
+from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats, trim_audio_to_10_minutes
 from messages import get_message
-from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video
+from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -75,6 +75,7 @@ async def stop(message: types.Message):
         except Exception as e:
             logging.error(f"Error deleting message {msg_id}: {e}")
     service_message_ids.clear()
+    cleanup_files()
 
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
 async def handle_media(message: types.Message):
@@ -87,6 +88,22 @@ async def handle_media(message: types.Message):
 
     file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
     user_file_path = file.name
+
+    # Проверка размера файла
+    if os.path.getsize(user_file_path) > max_file_size_mb * 1024 * 1024:
+        msg = await message.reply(get_message("large_file", language))
+        service_message_ids.append(msg.message_id)
+        os.remove(user_file_path)
+        return
+
+    # Проверка формата файла
+    file_ext = os.path.splitext(user_file_path)[1].lower()
+    if not (file_ext in audio_formats or file_ext in video_formats):
+        msg = await message.reply(get_message("invalid_format", language))
+        service_message_ids.append(msg.message_id)
+        os.remove(user_file_path)
+        return
+
     msg = await message.reply(get_message("processing_download", language))
     service_message_ids.append(msg.message_id)
     
@@ -138,6 +155,7 @@ async def handle_media(message: types.Message):
 
     msg = await message.reply(get_message("send_file", language))
     service_message_ids.append(msg.message_id)
+    cleanup_files()
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
