@@ -1,6 +1,7 @@
 import logging
 import os
 import asyncio
+import numpy as np
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile, BotCommand
@@ -83,78 +84,74 @@ async def handle_media(message: types.Message):
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
+    file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
+    user_file_path = file.name
+
+    # Проверка размера файла
+    if os.path.getsize(user_file_path) > max_file_size_mb * 1024 * 1024:
+        msg = await message.reply(get_message("large_file", language))
+        service_message_ids.append(msg.message_id)
+        os.remove(user_file_path)
+        return
+
+    # Проверка формата файла
+    file_ext = os.path.splitext(user_file_path)[1].lower()
+    if not (file_ext in audio_formats or file_ext in video_formats):
+        msg = await message.reply(get_message("invalid_format", language))
+        service_message_ids.append(msg.message_id)
+        os.remove(user_file_path)
+        return
+
     msg = await message.reply(get_message("processing_download", language))
     service_message_ids.append(msg.message_id)
     
     try:
-        if message.document or message.video or message.audio:
-            file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
-            user_file_path = file.name
-
-            # Проверка размера файла
-            if os.path.getsize(user_file_path) > max_file_size_mb * 1024 * 1024:
-                msg = await message.reply(get_message("large_file", language))
-                service_message_ids.append(msg.message_id)
-                os.remove(user_file_path)
-                return
-
-            # Проверка формата файла
-            file_ext = os.path.splitext(user_file_path)[1].lower()
-            if not (file_ext in audio_formats or file_ext in video_formats):
-                msg = await message.reply(get_message("invalid_format", language))
-                service_message_ids.append(msg.message_id)
-                os.remove(user_file_path)
-                return
-
+        if is_audio_file(user_file_path):
+            audio_parts = split_audio_file(user_file_path, chunk_length=600)
             await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
-
-            if is_audio_file(user_file_path):
-                audio_parts = split_audio_file(user_file_path, chunk_length=600)
-                for part in audio_parts:
-                    output_file, waveform, duration = convert_to_voice(part)
-                    if add_random_waveform:
-                        waveform_data = generate_waveform()
-                        async with telethon_client:
-                            await telethon_client.send_file(
-                                message.chat.id,
-                                file=output_file,
-                                voice_note=True,
-                                attributes=[
-                                    DocumentAttributeAudio(
-                                        duration=duration,
-                                        voice=True,
-                                        waveform=waveform_data
-                                    )
-                                ]
-                            )
-                    else:
-                        media_msg = await bot.send_voice(
-                            chat_id=message.chat.id,
-                            voice=InputFile(output_file),
-                            duration=duration
+            for part in audio_parts:
+                output_file, waveform, duration = convert_to_voice(part)
+                if add_random_waveform:
+                    waveform_data = generate_waveform()
+                    async with telethon_client:
+                        await telethon_client.send_file(
+                            message.chat.id,
+                            file=output_file,
+                            voice_note=True,
+                            attributes=[
+                                DocumentAttributeAudio(
+                                    duration=duration,
+                                    voice=True,
+                                    waveform=waveform_data
+                                )
+                            ]
                         )
-                        media_message_ids.append(media_msg.message_id)
-                    os.remove(output_file)  # Clean up the converted file
-            elif is_video_file(user_file_path):
-                video_parts = split_video_file(user_file_path, chunk_length=60)
-                for part in video_parts:
-                    output_file = convert_to_round_video(part)
-                    media_msg = await bot.send_video_note(
+                else:
+                    media_msg = await bot.send_voice(
                         chat_id=message.chat.id,
-                        video_note=InputFile(output_file)
+                        voice=InputFile(output_file),
+                        duration=duration
                     )
                     media_message_ids.append(media_msg.message_id)
-                    os.remove(output_file)  # Clean up the converted file
-            else:
-                msg = await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("invalid_format", language))
-                service_message_ids.append(msg.message_id)
-                user_file_path = None
-                return
-            await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
+                os.remove(output_file)  # Clean up the converted file
+        elif is_video_file(user_file_path):
+            video_parts = split_video_file(user_file_path, chunk_length=60)
+            await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
+            for part in video_parts:
+                output_file = convert_to_round_video(part)
+                async with telethon_client:
+                    await telethon_client.send_file(
+                        message.chat.id,
+                        file=output_file,
+                        video_note=True
+                    )
+                os.remove(output_file)  # Clean up the converted file
         else:
-            msg = await message.reply(get_message("invalid_file", language))
+            msg = await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("invalid_format", language))
             service_message_ids.append(msg.message_id)
+            user_file_path = None
             return
+        await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
     except KeyError as e:
         msg = await message.reply(f"Missing key in messages: {e}")
         service_message_ids.append(msg.message_id)
