@@ -3,7 +3,7 @@ import ffmpeg
 import logging
 from moviepy.editor import VideoFileClip, AudioFileClip
 import numpy as np
-from config import audio_formats, video_formats, trim_audio_to_10_minutes
+from config import audio_formats, video_formats
 
 # Инициализация логгера
 logger = logging.getLogger(__name__)
@@ -45,15 +45,6 @@ def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
 
-    temp_trimmed_path = None
-    # Проверяем, нужно ли обрезать аудио
-    if trim_audio_to_10_minutes and audio.duration > 600:
-        audio = audio.subclip(0, 600)
-        temp_trimmed_path = "temp_trimmed_audio.wav"
-        audio.write_audiofile(temp_trimmed_path, codec='pcm_s16le')
-        file_path = temp_trimmed_path
-        audio = AudioFileClip(file_path)
-
     duration = int(audio.duration)
 
     probe = ffmpeg.probe(file_path)
@@ -86,11 +77,7 @@ def convert_to_voice(file_path):
 
     audio_output.run(overwrite_output=True)
 
-    # Генерация случайного waveform для длинных файлов
     waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
-
-    if temp_trimmed_path and os.path.exists(temp_trimmed_path):
-        os.remove(temp_trimmed_path)
 
     return output_path, waveform, duration
 
@@ -110,6 +97,24 @@ def convert_to_round_video(file_path):
     ffmpeg.input(temp_file_path).output(output_path, vf='scale=320:320,format=yuv420p', vcodec='libx264', video_bitrate='800k').run(overwrite_output=True)
     os.remove(temp_file_path)
     return output_path
+
+def split_audio_file(file_path, chunk_duration=600):
+    audio = AudioFileClip(file_path)
+    chunks = []
+    for i in range(0, int(audio.duration), chunk_duration):
+        chunk_path = f"{os.path.splitext(file_path)[0]}_chunk_{i // chunk_duration}.ogg"
+        audio.subclip(i, min(i + chunk_duration, audio.duration)).write_audiofile(chunk_path, codec='libopus')
+        chunks.append(chunk_path)
+    return chunks
+
+def split_video_file(file_path, chunk_duration=60):
+    video = VideoFileClip(file_path)
+    chunks = []
+    for i in range(0, int(video.duration), chunk_duration):
+        chunk_path = f"{os.path.splitext(file_path)[0]}_chunk_{i // chunk_duration}.mp4"
+        video.subclip(i, min(i + chunk_duration, video.duration)).write_videofile(chunk_path, codec='libx264', audio_codec='aac')
+        chunks.append(chunk_path)
+    return chunks
 
 def cleanup_files():
     logger.info("Starting cleanup process")
