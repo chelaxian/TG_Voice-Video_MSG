@@ -1,15 +1,15 @@
 import logging
 import os
 import asyncio
+import numpy as np
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile, BotCommand
-from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats
+from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats, api_id, api_hash
 from messages import get_message
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files, split_audio_file, split_video_file
 from telethon import TelegramClient
 from telethon.tl.types import DocumentAttributeAudio
-import numpy as np
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
