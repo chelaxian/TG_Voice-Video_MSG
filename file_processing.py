@@ -1,13 +1,15 @@
 import os
-import ffmpeg
 import logging
-from moviepy.editor import VideoFileClip, AudioFileClip
 import numpy as np
+import ffmpeg
+from moviepy.editor import VideoFileClip, AudioFileClip
 
+# Инициализация логгера
 logger = logging.getLogger(__name__)
 
 def is_audio_file(file_path):
     try:
+        logger.info(f"Checking audio file format for: {file_path}")
         probe = ffmpeg.probe(file_path)
         for stream in probe['streams']:
             if stream['codec_type'] == 'audio' and 'video' not in [s['codec_type'] for s in probe['streams']]:
@@ -19,6 +21,7 @@ def is_audio_file(file_path):
 
 def is_video_file(file_path):
     try:
+        logger.info(f"Checking video file format for: {file_path}")
         probe = ffmpeg.probe(file_path)
         for stream in probe['streams']:
             if stream['codec_type'] == 'video':
@@ -29,8 +32,13 @@ def is_video_file(file_path):
         return False
 
 def generate_waveform():
-    waveform = np.random.randint(0, 256, size=80, dtype=np.uint8)
-    return waveform.tobytes()
+    try:
+        # Генерация случайного waveform
+        waveform = np.random.randint(0, 256, size=960, dtype=np.uint8)
+        return waveform.tobytes()
+    except Exception as e:
+        logger.error(f"Error generating waveform: {e}")
+        return None
 
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
@@ -67,15 +75,13 @@ def convert_to_voice(file_path):
 
     audio_output.run(overwrite_output=True)
 
+    # Генерация случайного waveform для длинных файлов
     waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
 
     return output_path, waveform, duration
 
 def convert_to_round_video(file_path):
     clip = VideoFileClip(file_path)
-
-    if clip.duration > 60:
-        clip = clip.subclip(0, 60)
 
     min_dimension = min(clip.size)
     x_center = (clip.size[0] - min_dimension) // 2
@@ -90,21 +96,23 @@ def convert_to_round_video(file_path):
 
 def split_audio_file(file_path, chunk_length=600):
     audio = AudioFileClip(file_path)
-    duration = audio.duration
+    duration = int(audio.duration)
     parts = []
-    for i in range(0, int(duration), chunk_length):
+    for i in range(0, duration, chunk_length):
         part_path = f"{file_path}_part_{i // chunk_length}.ogg"
-        audio.subclip(i, min(i + chunk_length, duration)).write_audiofile(part_path, codec='libvorbis')
+        part = audio.subclip(i, min(i + chunk_length, duration))
+        part.write_audiofile(part_path, codec='libvorbis')
         parts.append(part_path)
     return parts
 
 def split_video_file(file_path, chunk_length=60):
-    video = VideoFileClip(file_path)
-    duration = video.duration
+    clip = VideoFileClip(file_path)
+    duration = int(clip.duration)
     parts = []
-    for i in range(0, int(duration), chunk_length):
+    for i in range(0, duration, chunk_length):
         part_path = f"{file_path}_part_{i // chunk_length}.mp4"
-        video.subclip(i, min(i + chunk_length, duration)).write_videofile(part_path, codec='libx264', audio_codec='aac')
+        part = clip.subclip(i, min(i + chunk_length, duration))
+        part.write_videofile(part_path, codec='libx264', audio_codec='aac')
         parts.append(part_path)
     return parts
 
