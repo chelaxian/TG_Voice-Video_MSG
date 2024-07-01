@@ -2,10 +2,7 @@
 ![image](https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/e8901e1c-3f8c-4d25-bfe4-e27fca4bc189)
 
 ## Description
-This bot allows you to repost/upload any custom video and audio files and send it as telegram's voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages. Bot can works privately in your Saved Messages or like normal public bot.
-The bot trims the sent video to 1 minute to fit into Telegram's 1 minute limit for video messages.
-The bot also can trims sent audio up to 10 minutes (if you want so) to fit within Telegram's 10-minute limit for voice message transcription.
-
+This bot allows you to repost/upload any custom video and audio files and send it as telegram's voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages. 
 ## Installation
 
 ### Prerequisites
@@ -13,10 +10,10 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 - `ffmpeg-python`
 - `moviepy`
   
-- `telethon` (if you need private bot in your Saved Messages or if you want to add waveform to big voice messages)
-- `numpy` (if you want to add waveform to big voice messages)
+- `telethon` 
+- `numpy`
   
-- `aiogram 2.24` (if you need botfather public bot)
+- `aiogram 2.24`
 
 ### Steps
 
@@ -42,31 +39,23 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Configuration
 
-1. **Edit the config.py file to include your own API ID, API Hash (you can leave them empty if you have no plans to use telethon), and allowed user IDs. If you need BotFather bot - also include your botfather token. Replace the placeholders with your actual values.**
+1. **Edit the config.py file to include your own API ID, API Hash, and allowed user IDs. Also include your botfather token. Replace the placeholders with your actual values.**
    
     ```python
-    # Your API ID from my.telegram.org (provide if you need private bot or want big audio to have waveform)
+    # Your API ID from my.telegram.org
     api_id = 'YOUR_API_ID'
 
-    # Your API Hash from my.telegram.org (provide if you need private bot or want big audio to have waveform)
+    # Your API Hash from my.telegram.org 
     api_hash = 'YOUR_API_HASH'
 
-    # BotFather token (provide if you need public bot)
+    # BotFather token
     botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-    # Add random waveform to audio files (enable / disable using telethon and numpy) (not used in bot.py)
-    add_random_waveform = True
-    #add_random_waveform = False
-
-    # Trim audio to 10 minutes if it's longer (enable / disable long audio trimming)
-    trim_audio_to_10_minutes = True
-    #trim_audio_to_10_minutes = False
-
-    # Allow all users to interact with the bot (not used in bot.py)
+    # Allow all users to interact with the bot 
     #allow_all_users = True
     allow_all_users = False
     
-    # Your Telegram user ID and allowed user IDs (provide your ID and delete/ignore others if not needed)
+    # Your Telegram user ID and allowed user IDs 
     allowed_user_id = ['YOUR_USER_ID', 'USER_ID2', 'USER_ID3']
 
     # Language setting: 'RU' for Russian, 'EN' for English, 'CN' for Chinese
@@ -92,39 +81,26 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 
 ### Running the Bot
 
-1. **Run the personal bot:**
+1. **Run the bot:**
    
     ```sh
     python3 bot.py
     ```
-    
-    or if you need public bot:
-   
-    ```sh
-    python3 botfather.py
-    ```
-    
-    Upon first run, for `bot.py` you will be prompted to enter your phone number, the verification code sent to your Telegram, and your cloud password (if enabled). for `botfather.py` it is not needed.
 
 ### Usage
 
 1. **Start the bot:**
-    Send `/start_voice_video_bot` to your Telegram "Saved Messages" chat or to public bot.
+    Send `/start_voice_video_bot` to your Telegram bot.
 
 2. **Send a file:**
-    Upload or repost an audio or video file to the "Saved Messages" chat or to public bot.
+    Upload or repost an audio or video file to the bot.
 
 3. **Provide chat/user ID:**
-    After the file is processed, the bot will send you converted file and ask for the chat/user ID to send the file to. Enter the chat/user ID.
-   
-    To get user/group ID you can search any bot in Telegram named like "Get My ID" or similar. For example https://t.me/getmy_idbot or https://t.me/username_to_id_bot
-   
-    Or you can use custom Telegram client like Swiftgram / Nicegram / iMe that have this function too.
-   
-    Or you can just stop the bot and repost converted file with turned on option "hide sender name".
+    After the file is processed, the bot will send you converted file.
+    To send voice/video from your sender name you can stop the bot and repost converted file with turned on telegram option "hide sender name".
 
 5. **Stop the bot:**
-    Send `/stop_voice_video_bot` to your Telegram "Saved Messages" chat or to public bot.
+    Send `/stop_voice_video_bot` to your Telegram bot.
 
 
 ### Obtaining API ID and Hash (and BotFather token)
@@ -136,10 +112,9 @@ The bot also can trims sent audio up to 10 minutes (if you want so) to fit withi
 5. For BotFather bot and token use telegram bot - @BotFather
    
 ### Notes
-- Even for BotFather bot you still need API ID and API HASH if you want to add waveform to big voice messages, because only telethon/pyrogram can inject waveform into voice messages bigger than 1 mb ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). API ID and API HASH are requirements for telethon. if no waveform is OK for you - you can ignore this 2 parameters and don't install telethon and numpy python modules.
-- Ensure the API ID / Hash (or BotFather token) and your user ID are correctly set in the config.py file.
+- You need API ID and API HASH because only telethon/pyrogram can inject waveform into voice messages bigger than 1 mb ( see https://github.com/chelaxian/TG_Voice-Video_MSG/issues/1 ). API ID and API HASH are requirements for telethon.
+- Ensure the API ID / Hash and BotFather token and your user ID are correctly set in the config.py file.
 - The bot only responds to commands from the allowed user IDs specified in the config.py file.
-- For user IDs, use the format `xxxxxxxxxx`. For group/supergroup IDs, use the format `-xxxxxxxxxx` / `-100xxxxxxxxxx`.
 
 ## Supported Languages
 - Russian (RU)
