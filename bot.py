@@ -1,193 +1,182 @@
-import os
 import logging
+import os
 import asyncio
-from telethon import TelegramClient, events
-from config import api_id, api_hash, allowed_user_id, language, max_file_size_mb, audio_formats, video_formats, trim_audio_to_10_minutes
-from messages import get_message, get_user_link, get_group_link
-from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files
+import numpy as np
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils import executor
+from aiogram.types import ContentType, InputFile, BotCommand
+from config import botfather_token, language, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats, api_id, api_hash
+from messages import get_message
+from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files, split_audio_file, split_video_file
+from telethon import TelegramClient
 from telethon.tl.types import DocumentAttributeAudio
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
-client = TelegramClient('anon_session', api_id, api_hash)
+# Initialize aiogram bot and dispatcher
+bot = Bot(token=botfather_token)
+dp = Dispatcher(bot)
 
-user_file = None
-user_chat_id = None
-downloaded_file_path = None
-bot_active = False
-awaiting_id = False
-processing_messages = []
+# Initialize telethon client with bot token
+session_name = 'bot_session'
+telethon_client = TelegramClient(session_name, api_id, api_hash)
 
-async def send_welcome_message():
-    welcome_message = get_message("welcome", language)
-    me = await client.get_me()
-    await client.send_message(me.id, welcome_message, parse_mode='markdown', silent=True)
-    await client.pin_message(me.id, (await client.get_messages(me.id, limit=1))[0].id)
+async def start_telethon_client():
+    await telethon_client.start(bot_token=botfather_token)
 
-@client.on(events.NewMessage(pattern='/start_voice_video_bot'))
-async def start(event):
-    global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
-    if str(event.sender_id) not in allowed_user_id or event.chat_id != event.sender_id:
-        logger.warning(f"User {event.sender_id} attempted to use the bot without access or in a wrong chat.")
+asyncio.get_event_loop().run_until_complete(start_telethon_client())
+
+user_file_path = None
+service_message_ids = []
+media_message_ids = []
+bot_active = False  # Глобальная переменная для отслеживания состояния бота
+
+def generate_waveform():
+    # Генерация случайной waveform
+    waveform = np.random.randint(0, 256, size=80, dtype=np.uint8)
+    return waveform.tobytes()
+
+async def set_commands():
+    commands = [
+        BotCommand(command="/start_voice_video_bot", description=get_message("command_start_description", language)),
+        BotCommand(command="/stop_voice_video_bot", description=get_message("command_stop_description", language))
+    ]
+    await bot.set_my_commands(commands)
+
+@dp.message_handler(commands=['start_voice_video_bot'])
+async def start(message: types.Message):
+    global user_file_path, bot_active
+    if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    bot_active = True
-    user_file = None
-    user_chat_id = None
-    awaiting_id = False
-    processing_messages = []
-    logger.info(f"Received /start_voice_video_bot command from user {event.sender_id}")
-    start_message = await event.reply(get_message("start", language))
-    processing_messages.append(start_message.id)
-    send_file_message = await event.reply(get_message("send_file", language))
-    processing_messages.append(send_file_message.id)
+    bot_active = True  # Включаем бота
+    user_file_path = None
+    msg1 = await message.reply(get_message("start", language))
+    msg2 = await message.reply(get_message("send_file", language))
+    service_message_ids.extend([msg1.message_id, msg2.message_id, message.message_id])
 
-@client.on(events.NewMessage(pattern='/stop_voice_video_bot'))
-async def stop(event):
-    global bot_active, user_file, user_chat_id, awaiting_id, processing_messages
-    if str(event.sender_id) not in allowed_user_id or event.chat_id != event.sender_id:
+@dp.message_handler(commands=['stop_voice_video_bot'])
+async def stop(message: types.Message):
+    global user_file_path, bot_active
+    if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    bot_active = False
-    user_file = None
-    user_chat_id = None
-    awaiting_id = False
-    cleanup_files()
-    stop_message = await event.reply(get_message("stop", language))
-    logger.info(f"Bot stopped by user {event.sender_id}. Files cleaned up.")
-    processing_messages.append(stop_message.id)
+    bot_active = False  # Останавливаем бота
+    user_file_path = None
+    msg = await message.reply(get_message("stop", language))
+    service_message_ids.append(msg.message_id)
+    service_message_ids.append(message.message_id)  # Добавляем ID сообщения команды
 
-    for msg_id in processing_messages:
+    for msg_id in service_message_ids:
         try:
-            await client.delete_messages(event.chat_id, msg_id)
+            await bot.delete_message(message.chat.id, msg_id)
         except Exception as e:
-            logger.error(f"Error deleting message {msg_id}: {e}")
-    processing_messages = []
+            logging.error(f"Error deleting message {msg_id}: {e}")
+    service_message_ids.clear()
+    cleanup_files()
 
-@client.on(events.NewMessage(func=lambda e: str(e.sender_id) in allowed_user_id and bot_active and e.chat_id == e.sender_id and e.file))
-async def handle_media(event):
-    global user_file, downloaded_file_path, awaiting_id, processing_messages
-    logger.info(f"Received file from user {event.sender_id}")
+@dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
+async def handle_media(message: types.Message):
+    global user_file_path, bot_active, service_message_ids
+    if not bot_active:
+        return  # Игнорируем сообщения, если бот не активен
 
-    file = event.message.file
-    if not file:
-        invalid_file_message = await event.reply(get_message("invalid_file", language))
-        processing_messages.append(invalid_file_message.id)
-        logger.warning(f"User {event.sender_id} sent an invalid file.")
+    if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
-
-    if file.size > max_file_size_mb * 1024 * 1024:
-        large_file_message = await event.reply(get_message("large_file", language))
-        processing_messages.append(large_file_message.id)
-        logger.warning(f"User {event.sender_id} sent a file larger than {max_file_size_mb}MB.")
-        return
-
-    logger.info(f"Downloading file from user {event.sender_id}")
-
-    download_message = await event.reply(get_message("processing_download", language))
-    processing_messages.append(download_message.id)
-
-    file_ext = os.path.splitext(file.name)[1].lower() if file.name else '.ogg'
-    destination_dir = 'files/music' if file_ext in audio_formats else 'files/videos'
-    
-    if not os.path.exists(destination_dir):
-        os.makedirs(destination_dir)
-
-    downloaded_file_path = await event.message.download_media(file=os.path.join(destination_dir, f'downloaded_media{file_ext}'))
-    user_file = downloaded_file_path
-    logger.info(f"File downloaded to {downloaded_file_path}. Starting processing.")
-
-    await client.delete_messages(event.chat_id, download_message.id)
-
-    logger.info(f"Downloaded file path: {downloaded_file_path}")
-
-    processing_message = await event.reply(get_message("processing_conversion", language))
-    processing_messages.append(processing_message.id)
 
     try:
-        if is_audio_file(downloaded_file_path):
-            logger.info("File is an audio file, converting to voice message.")
-            output_file, waveform, duration = convert_to_voice(downloaded_file_path)
-            await client.send_file(event.chat_id, output_file, voice_note=True, attributes=[
-                DocumentAttributeAudio(
-                    duration=duration,
-                    voice=True,
-                    waveform=waveform
-                )
-            ])
-            send_id_message = await event.reply(get_message("send_id", language))
-            processing_messages.append(send_id_message.id)
-        elif is_video_file(downloaded_file_path):
-            logger.info("File is a video file, converting to round video.")
-            output_file = convert_to_round_video(downloaded_file_path)
-            await client.send_file(event.chat_id, output_file, video_note=True)
-            send_id_message = await event.reply(get_message("send_id", language))
-            processing_messages.append(send_id_message.id)
-        else:
-            invalid_format_message = await event.reply(get_message("invalid_format", language))
-            processing_messages.append(invalid_format_message.id)
-            logger.warning(f"User {event.sender_id} sent a file with unsupported format.")
-            user_file = None
-        awaiting_id = True
+        if message.document or message.video or message.audio:
+            if message.document:
+                file_id = message.document.file_id
+                file_size = message.document.file_size
+            elif message.video:
+                file_id = message.video.file_id
+                file_size = message.video.file_size
+            else:
+                file_id = message.audio.file_id
+                file_size = message.audio.file_size
+
+            # Проверка размера файла и скачивание через Telethon если файл слишком большой
+            if file_size > max_file_size_mb * 1024 * 1024:
+                async with telethon_client:
+                    file = await telethon_client.download_media(message, file=bytes)
+                    user_file_path = os.path.join('files', 'videos', file_id + os.path.splitext(file_id)[1])
+                    with open(user_file_path, 'wb') as f:
+                        f.write(file)
+            else:
+                file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
+                user_file_path = file.name
+
+            # Проверка формата файла
+            file_ext = os.path.splitext(user_file_path)[1].lower()
+            if not (file_ext in audio_formats or file_ext in video_formats):
+                msg = await message.reply(get_message("invalid_format", language))
+                service_message_ids.append(msg.message_id)
+                os.remove(user_file_path)
+                return
+
+            msg = await message.reply(get_message("processing_download", language))
+            service_message_ids.append(msg.message_id)
+            
+            try:
+                if is_audio_file(user_file_path):
+                    audio_parts = split_audio_file(user_file_path, chunk_length=600)
+                    await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
+                    for part in audio_parts:
+                        output_file, waveform, duration = convert_to_voice(part)
+                        waveform_data = generate_waveform()
+                        async with telethon_client:
+                            await telethon_client.send_file(
+                                message.chat.id,
+                                file=output_file,
+                                voice_note=True,
+                                attributes=[
+                                    DocumentAttributeAudio(
+                                        duration=duration,
+                                        voice=True,
+                                        waveform=waveform_data
+                                    )
+                                ]
+                            )
+                        os.remove(output_file)  # Clean up the converted file
+                elif is_video_file(user_file_path):
+                    video_parts = split_video_file(user_file_path, chunk_length=60)
+                    await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
+                    for part in video_parts:
+                        output_file = convert_to_round_video(part)
+                        async with telethon_client:
+                            await telethon_client.send_file(
+                                message.chat.id,
+                                file=output_file,
+                                video_note=True
+                            )
+                        os.remove(output_file)  # Clean up the converted file
+                else:
+                    msg = await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("invalid_format", language))
+                    service_message_ids.append(msg.message_id)
+                    user_file_path = None
+                    return
+                await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
+            except KeyError as e:
+                msg = await message.reply(f"Missing key in messages: {e}")
+                service_message_ids.append(msg.message_id)
+            except Exception as e:
+                msg = await message.reply(f"Error processing file: {e}")
+                service_message_ids.append(msg.message_id)
+                user_file_path = None
+                return
+
+            msg = await message.reply(get_message("send_file", language))
+            service_message_ids.append(msg.message_id)
+            cleanup_files()
     except Exception as e:
-        conversion_error_message = await event.reply(get_message("conversion_error", language).format(error=e))
-        processing_messages.append(conversion_error_message.id)
-        logger.error(f"Error during file conversion: {e}")
-        user_file = None
+        msg = await message.reply(f"Error handling media: {e}")
+        service_message_ids.append(msg.message_id)
 
-    await client.delete_messages(event.chat_id, processing_message.id)
 
-@client.on(events.NewMessage(func=lambda e: str(e.sender_id) in allowed_user_id and bot_active and e.chat_id == e.sender_id and not e.file))
-async def handle_id(event):
-    global user_chat_id, user_file, awaiting_id, processing_messages
-    if not awaiting_id:
-        return
-
-    chat_id = event.message.text.strip()
-    if not chat_id.lstrip('-').isdigit():
-        invalid_id_message = await event.reply(get_message("invalid_id", language))
-        processing_messages.append(invalid_id_message.id)
-        awaiting_id = True
-        return
-
-    user_chat_id = int(chat_id)
-    await send_media_message(event)
-    awaiting_id = True
-
-async def send_media_message(event):
-    global user_chat_id, user_file, processing_messages
-    try:
-        sending_message = await event.reply(get_message("processing_send", language))
-        processing_messages.append(sending_message.id)
-
-        if is_audio_file(user_file):
-            output_file, waveform, duration = convert_to_voice(user_file)
-            await client.send_file(user_chat_id, output_file, voice_note=True, attributes=[
-                DocumentAttributeAudio(
-                    duration=duration,
-                    voice=True,
-                    waveform=waveform
-                )
-            ])
-        elif is_video_file(user_file):
-            output_file = convert_to_round_video(user_file)
-            await client.send_file(user_chat_id, output_file, video_note=True)
-
-        link = get_user_link(user_chat_id) if user_chat_id > 0 else get_group_link(user_chat_id)
-        send_next_id_message = await event.reply(get_message("send_next_id", language).format(id=link), parse_mode='markdown')
-        processing_messages.append(send_next_id_message.id)
-
-        await client.delete_messages(event.chat_id, sending_message.id)
-    except Exception as e:
-        send_error_message = await event.reply(get_message("send_error", language).format(error=e))
-        processing_messages.append(send_error_message.id)
-
-async def main():
-    await client.start()
-    await send_welcome_message()
-    logger.info("Bot started")
-    await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(set_commands())
+    executor.start_polling(dp, skip_updates=True)

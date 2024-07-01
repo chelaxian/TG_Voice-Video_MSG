@@ -1,9 +1,8 @@
 import os
-import ffmpeg
 import logging
-from moviepy.editor import VideoFileClip, AudioFileClip
 import numpy as np
-from config import audio_formats, video_formats, trim_audio_to_10_minutes
+import ffmpeg
+from moviepy.editor import VideoFileClip, AudioFileClip
 
 # Инициализация логгера
 logger = logging.getLogger(__name__)
@@ -44,16 +43,6 @@ def generate_waveform():
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
     audio = AudioFileClip(file_path)
-
-    temp_trimmed_path = None
-    # Проверяем, нужно ли обрезать аудио
-    if trim_audio_to_10_minutes and audio.duration > 600:
-        audio = audio.subclip(0, 600)
-        temp_trimmed_path = "temp_trimmed_audio.wav"
-        audio.write_audiofile(temp_trimmed_path, codec='pcm_s16le')
-        file_path = temp_trimmed_path
-        audio = AudioFileClip(file_path)
-
     duration = int(audio.duration)
 
     probe = ffmpeg.probe(file_path)
@@ -89,16 +78,10 @@ def convert_to_voice(file_path):
     # Генерация случайного waveform для длинных файлов
     waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
 
-    if temp_trimmed_path and os.path.exists(temp_trimmed_path):
-        os.remove(temp_trimmed_path)
-
     return output_path, waveform, duration
 
 def convert_to_round_video(file_path):
     clip = VideoFileClip(file_path)
-
-    if clip.duration > 60:
-        clip = clip.subclip(0, 60)
 
     min_dimension = min(clip.size)
     x_center = (clip.size[0] - min_dimension) // 2
@@ -111,6 +94,29 @@ def convert_to_round_video(file_path):
     os.remove(temp_file_path)
     return output_path
 
+
+def split_audio_file(file_path, chunk_length=600):
+    audio = AudioFileClip(file_path)
+    duration = int(audio.duration)
+    parts = []
+    for i in range(0, duration, chunk_length):
+        part_path = f"{file_path}_part_{i // chunk_length}.ogg"
+        part = audio.subclip(i, min(i + chunk_length, duration))
+        part.write_audiofile(part_path, codec='libvorbis')
+        parts.append(part_path)
+    return parts
+
+def split_video_file(file_path, chunk_length=60):
+    clip = VideoFileClip(file_path)
+    duration = int(clip.duration)
+    parts = []
+    for i in range(0, duration, chunk_length):
+        part_path = f"{file_path}_part_{i // chunk_length}.mp4"
+        part = clip.subclip(i, min(i + chunk_length, duration))
+        part.write_videofile(part_path, codec='libx264', audio_codec='aac')
+        parts.append(part_path)
+    return parts
+
 def cleanup_files():
     logger.info("Starting cleanup process")
     # Удаление известных временных файлов
@@ -120,7 +126,7 @@ def cleanup_files():
             os.remove(file)
 
     # Удаление всех поддерживаемых аудио и видео файлов в директории files
-    supported_formats = [ext.lower() for ext in audio_formats + video_formats]
+    supported_formats = ['.mp3', '.wav', '.ogg', '.oga', '.m4a', '.aac', '.flac', '.alac', '.wma', '.aiff', '.opus', '.amr', '.mka', '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.3g2', '.mxf', '.ogv', '.mts', '.m2ts']
     for root, dirs, files in os.walk('files'):
         logger.info(f"Scanning directory: {root}")
         for file in files:
