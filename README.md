@@ -64,7 +64,7 @@ This bot allows you to repost/upload any custom video and audio files and send i
     #language = 'CN'
 
     # Maximum file size in megabytes (adjust size as you need)
-    max_file_size_mb = 100
+    max_file_size_mb = 50
 
     # Supported audio formats (you can limit formats if you want to)
     audio_formats = [
