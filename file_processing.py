@@ -27,6 +27,18 @@ def is_video_file(file_path):
             if stream['codec_type'] == 'video':
                 return True
         return False
+    except ffmpeg.Error as e:
+        logger.error(f"ffmpeg error: {e}")
+        return False
+
+def generate_waveform():
+    try:
+        # Генерация случайного waveform
+        waveform = np.random.randint(0, 256, size=960, dtype=np.uint8)
+        return waveform.tobytes()
+    except Exception as e:
+        logger.error(f"Error generating waveform: {e}")
+        return None
 
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
@@ -64,7 +76,7 @@ def convert_to_voice(file_path):
     audio_output.run(overwrite_output=True)
 
     # Генерация случайного waveform для длинных файлов
-    waveform = np.random.randint(0, 256, size=960, dtype=np.uint8).tobytes() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
+    waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
 
     return output_path, waveform, duration
 
