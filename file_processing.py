@@ -94,6 +94,7 @@ def convert_to_round_video(file_path):
     os.remove(temp_file_path)
     return output_path
 
+
 def split_audio_file(file_path, chunk_length=600):
     audio = AudioFileClip(file_path)
     duration = int(audio.duration)
