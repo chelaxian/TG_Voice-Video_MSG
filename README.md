@@ -1,6 +1,6 @@
 # Voice-Video Telegram Bot
 <img width="348" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/bb9c6eb1-552c-4d19-b3f6-fb2295a558c0"> \
-<img width="348" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/99bd51bb-c4ee-41d1-a462-bb72662c88bf"> \
+<img width="348" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/99bd51bb-c4ee-41d1-a462-bb72662c88bf">
 
 ## Description
 This bot allows you to repost/upload any custom video and audio files and send it as telegram's voice messages and round videos to specified users or groups in Telegram. The bot supports Russian, English, and Chinese languages. 
