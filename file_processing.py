@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import ffmpeg
 from moviepy.editor import VideoFileClip, AudioFileClip
+from config import audio_formats, video_formats
 
 # Инициализация логгера
 logger = logging.getLogger(__name__)
