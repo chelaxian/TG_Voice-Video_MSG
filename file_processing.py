@@ -117,6 +117,7 @@ def split_video_file(file_path, chunk_length=60):
         parts.append(part_path)
     return parts
 
+
 def cleanup_files():
     logger.info("Starting cleanup process")
     # Удаление известных временных файлов
