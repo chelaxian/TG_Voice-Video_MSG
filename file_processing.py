@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import ffmpeg
 from moviepy.editor import VideoFileClip, AudioFileClip
-from config import audio_formats, video_formats
 
 # Инициализация логгера
 logger = logging.getLogger(__name__)
@@ -28,18 +27,6 @@ def is_video_file(file_path):
             if stream['codec_type'] == 'video':
                 return True
         return False
-    except ffmpeg.Error as e:
-        logger.error(f"ffmpeg error: {e}")
-        return False
-
-def generate_waveform():
-    try:
-        # Генерация случайного waveform
-        waveform = np.random.randint(0, 256, size=960, dtype=np.uint8)
-        return waveform.tobytes()
-    except Exception as e:
-        logger.error(f"Error generating waveform: {e}")
-        return None
 
 def convert_to_voice(file_path):
     output_path = 'converted_voice.ogg'
@@ -77,7 +64,7 @@ def convert_to_voice(file_path):
     audio_output.run(overwrite_output=True)
 
     # Генерация случайного waveform для длинных файлов
-    waveform = generate_waveform() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
+    waveform = np.random.randint(0, 256, size=960, dtype=np.uint8).tobytes() if os.path.getsize(output_path) > 1 * 1024 * 1024 or audio.duration > 120 else None
 
     return output_path, waveform, duration
 
@@ -117,7 +104,6 @@ def split_video_file(file_path, chunk_length=60):
         parts.append(part_path)
     return parts
 
-
 def cleanup_files():
     logger.info("Starting cleanup process")
     # Удаление известных временных файлов
@@ -127,7 +113,7 @@ def cleanup_files():
             os.remove(file)
 
     # Удаление всех поддерживаемых аудио и видео файлов в директории files
-    supported_formats = [ext.lower() for ext in audio_formats + video_formats]
+    supported_formats = ['.mp3', '.wav', '.ogg', '.oga', '.m4a', '.aac', '.flac', '.alac', '.wma', '.aiff', '.opus', '.amr', '.mka', '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.3g2', '.mxf', '.ogv', '.mts', '.m2ts']
     for root, dirs, files in os.walk('files'):
         logger.info(f"Scanning directory: {root}")
         for file in files:
@@ -139,4 +125,3 @@ def cleanup_files():
                     os.remove(file_path)
                 except Exception as e:
                     logger.error(f"Error removing file {file_path}: {e}")
-
