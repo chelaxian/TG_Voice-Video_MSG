@@ -1,13 +1,13 @@
-# Your API ID from my.telegram.org (provide if you need private bot or want big audio to have waveform)
+# Your API ID from my.telegram.org 
 api_id = 'YOUR_API_ID'
 
-# Your API Hash from my.telegram.org (provide if you need private bot or want big audio to have waveform)
+# Your API Hash from my.telegram.org
 api_hash = 'YOUR_API_HASH'
 
-# BotFather token (provide if you need public bot)
+# BotFather token
 botfather_token = 'YOUR_BOTFATHER_TOKEN'
 
-# Allow all users to interact with the bot (not used in bot.py)
+# Allow all users to interact with the bot 
 #allow_all_users = True
 allow_all_users = False
 
@@ -20,7 +20,7 @@ language = 'EN'
 #language = 'CN'
 
 # Maximum file size in megabytes (adjust size as you need)
-max_file_size_mb = 2000
+max_file_size_mb = 50
 
 # Supported audio formats (you can limit formats if you want to)
 audio_formats = [
