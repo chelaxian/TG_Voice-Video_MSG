@@ -5,7 +5,7 @@ import numpy as np
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.types import ContentType, InputFile, BotCommand
-from config import botfather_token, language, add_random_waveform, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats, api_id, api_hash
+from config import botfather_token, language, allow_all_users, allowed_user_id, max_file_size_mb, audio_formats, video_formats, api_id, api_hash
 from messages import get_message
 from file_processing import is_audio_file, is_video_file, convert_to_voice, convert_to_round_video, cleanup_files, split_audio_file, split_video_file
 from telethon import TelegramClient
@@ -67,6 +67,8 @@ async def stop(message: types.Message):
     msg = await message.reply(get_message("stop", language))
     service_message_ids.append(msg.message_id)
     
+    # Удаление сообщений с командами
+    await bot.delete_message(message.chat.id, msg.message_id)
     for msg_id in service_message_ids:
         try:
             await bot.delete_message(message.chat.id, msg_id)
@@ -111,7 +113,7 @@ async def handle_media(message: types.Message):
             await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
             for part in audio_parts:
                 output_file, waveform, duration = convert_to_voice(part)
-                if add_random_waveform:
+                if os.path.getsize(output_file) > 1 * 1024 * 1024 or duration > 120:
                     waveform_data = generate_waveform()
                     async with telethon_client:
                         await telethon_client.send_file(
