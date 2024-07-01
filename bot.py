@@ -67,8 +67,14 @@ async def stop(message: types.Message):
     msg = await message.reply(get_message("stop", language))
     service_message_ids.append(msg.message_id)
 
-    # Удаление сообщений с командами
-    await bot.delete_message(message.chat.id, msg.message_id)
+    # Удаление всех сообщений команд
+    try:
+        async for msg in bot.get_chat_history(message.chat.id, limit=50):
+            if msg.text in ["/start_voice_video_bot", "/stop_voice_video_bot"]:
+                await bot.delete_message(message.chat.id, msg.message_id)
+    except Exception as e:
+        logging.error(f"Error deleting command messages: {e}")
+
     for msg_id in service_message_ids:
         try:
             await bot.delete_message(message.chat.id, msg_id)
@@ -76,6 +82,7 @@ async def stop(message: types.Message):
             logging.error(f"Error deleting message {msg_id}: {e}")
     service_message_ids.clear()
     cleanup_files()
+
 
 
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
@@ -110,14 +117,23 @@ async def handle_media(message: types.Message):
             service_message_ids.append(msg.message_id)
             return
 
-        if message.document:
-            file = await message.document.download(destination_dir='files')
-        elif message.video:
-            file = await message.video.download(destination_dir='files')
+        if file_size > 50 * 1024 * 1024:
+            # Используем Telethon для больших файлов
+            if message.document:
+                file = await telethon_client.download_media(message.document, file="files/")
+            elif message.video:
+                file = await telethon_client.download_media(message.video, file="files/")
+            else:
+                file = await telethon_client.download_media(message.audio, file="files/")
         else:
-            file = await message.audio.download(destination_dir='files')
+            if message.document:
+                file = await message.document.download(destination_dir='files')
+            elif message.video:
+                file = await message.video.download(destination_dir='files')
+            else:
+                file = await message.audio.download(destination_dir='files')
 
-        user_file_path = file.name
+        user_file_path = file if isinstance(file, str) else file.name
 
         if is_audio_file(user_file_path):
             audio_parts = split_audio_file(user_file_path, chunk_length=600)
@@ -178,6 +194,7 @@ async def handle_media(message: types.Message):
     msg = await message.reply(get_message("send_file", language))
     service_message_ids.append(msg.message_id)
     cleanup_files()
+
 
 
 if __name__ == '__main__':
