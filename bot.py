@@ -66,7 +66,7 @@ async def stop(message: types.Message):
     user_file_path = None
     msg = await message.reply(get_message("stop", language))
     service_message_ids.append(msg.message_id)
-    
+
     # Удаление сообщений с командами
     await bot.delete_message(message.chat.id, msg.message_id)
     for msg_id in service_message_ids:
@@ -77,6 +77,7 @@ async def stop(message: types.Message):
     service_message_ids.clear()
     cleanup_files()
 
+
 @dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.VIDEO, ContentType.AUDIO])
 async def handle_media(message: types.Message):
     global user_file_path, bot_active, service_message_ids
@@ -86,28 +87,38 @@ async def handle_media(message: types.Message):
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    file = await message.document.download(destination_dir='files') if message.document else await message.video.download(destination_dir='files') if message.video else await message.audio.download(destination_dir='files')
-    user_file_path = file.name
-
-    # Проверка размера файла
-    if os.path.getsize(user_file_path) > max_file_size_mb * 1024 * 1024:
-        msg = await message.reply(get_message("large_file", language))
-        service_message_ids.append(msg.message_id)
-        os.remove(user_file_path)
-        return
-
     # Проверка формата файла
-    file_ext = os.path.splitext(user_file_path)[1].lower()
+    file_ext = os.path.splitext(message.document.file_name if message.document else message.video.file_name if message.video else message.audio.file_name)[1].lower()
     if not (file_ext in audio_formats or file_ext in video_formats):
         msg = await message.reply(get_message("invalid_format", language))
         service_message_ids.append(msg.message_id)
-        os.remove(user_file_path)
         return
 
     msg = await message.reply(get_message("processing_download", language))
     service_message_ids.append(msg.message_id)
-    
+
     try:
+        if message.document:
+            file_size = message.document.file_size
+        elif message.video:
+            file_size = message.video.file_size
+        else:
+            file_size = message.audio.file_size
+
+        if file_size > max_file_size_mb * 1024 * 1024:
+            msg = await message.reply(get_message("large_file", language))
+            service_message_ids.append(msg.message_id)
+            return
+
+        if message.document:
+            file = await message.document.download(destination_dir='files')
+        elif message.video:
+            file = await message.video.download(destination_dir='files')
+        else:
+            file = await message.audio.download(destination_dir='files')
+
+        user_file_path = file.name
+
         if is_audio_file(user_file_path):
             audio_parts = split_audio_file(user_file_path, chunk_length=600)
             await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_conversion", language))
@@ -153,6 +164,7 @@ async def handle_media(message: types.Message):
             service_message_ids.append(msg.message_id)
             user_file_path = None
             return
+
         await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
     except KeyError as e:
         msg = await message.reply(f"Missing key in messages: {e}")
@@ -166,6 +178,7 @@ async def handle_media(message: types.Message):
     msg = await message.reply(get_message("send_file", language))
     service_message_ids.append(msg.message_id)
     cleanup_files()
+
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
