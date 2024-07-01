@@ -66,15 +66,14 @@ async def stop(message: types.Message):
     user_file_path = None
     msg = await message.reply(get_message("stop", language))
     service_message_ids.append(msg.message_id)
-
-    # Удаление всех сообщений команд
-    command_messages = ["/start_voice_video_bot", "/stop_voice_video_bot"]
-    async for msg in bot.get_chat_history(message.chat.id, limit=50):
-        if msg.text in command_messages:
+    
+    # Удаление всех сообщений команд с использованием telethon
+    async for msg in telethon_client.iter_messages(message.chat.id, limit=50):
+        if msg.text in ["/start_voice_video_bot", "/stop_voice_video_bot"]:
             try:
-                await bot.delete_message(message.chat.id, msg.message_id)
+                await telethon_client.delete_messages(message.chat.id, msg.id)
             except Exception as e:
-                logging.error(f"Error deleting message {msg.message_id}: {e}")
+                logging.error(f"Error deleting message {msg.id}: {e}")
 
     for msg_id in service_message_ids:
         try:
@@ -83,6 +82,7 @@ async def stop(message: types.Message):
             logging.error(f"Error deleting message {msg_id}: {e}")
     service_message_ids.clear()
     cleanup_files()
+
 
 
 
@@ -96,7 +96,6 @@ async def handle_media(message: types.Message):
     if not allow_all_users and str(message.from_user.id) not in allowed_user_id:
         return
 
-    # Проверка формата файла
     file_ext = os.path.splitext(message.document.file_name if message.document else message.video.file_name if message.video else message.audio.file_name)[1].lower()
     if not (file_ext in audio_formats or file_ext in video_formats):
         msg = await message.reply(get_message("invalid_format", language))
@@ -119,7 +118,6 @@ async def handle_media(message: types.Message):
             service_message_ids.append(msg.message_id)
             return
 
-        # Используем Telethon для загрузки файлов
         if file_size > 50 * 1024 * 1024:
             if message.document:
                 file = await telethon_client.download_media(message.document, file="files/")
