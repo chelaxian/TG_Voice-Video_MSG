@@ -1,5 +1,5 @@
 # Voice-Video Telegram Bot
-<img width="348" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/bb9c6eb1-552c-4d19-b3f6-fb2295a558c0">\n
+<img width="348" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/bb9c6eb1-552c-4d19-b3f6-fb2295a558c0"> \
 <img width="341" alt="image" src="https://github.com/chelaxian/TG_Voice-Video_MSG/assets/69438111/13b58774-181c-4291-8f19-db7ace55cc6a">
 
 ## Description
