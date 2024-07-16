@@ -131,6 +131,7 @@ async def handle_media(message: types.Message):
                                 message.chat.id,
                                 file=output_file,
                                 voice_note=True,
+                                reply_to=message.message_id,  # Добавлено чтобы ответить на исходное сообщение
                                 attributes=[
                                     DocumentAttributeAudio(
                                         duration=duration,
@@ -149,7 +150,8 @@ async def handle_media(message: types.Message):
                             await telethon_client.send_file(
                                 message.chat.id,
                                 file=output_file,
-                                video_note=True
+                                video_note=True,
+                                reply_to=message.message_id  # Добавлено чтобы ответить на исходное сообщение
                             )
                         os.remove(output_file)  # Clean up the converted file
                 else:
@@ -159,22 +161,20 @@ async def handle_media(message: types.Message):
                     return
                 await bot.edit_message_text(chat_id=message.chat.id, message_id=msg.message_id, text=get_message("processing_send", language))
             except KeyError as e:
-                msg = await message.reply(f"Missing key in messages: {e}")
+                msg = await message.reply(f"Missing key in messages: {e}", reply_to=message.message_id)
                 service_message_ids.append(msg.message_id)
             except Exception as e:
-                msg = await message.reply(f"Error processing file: {e}")
+                msg = await message.reply(f"Error processing file: {e}", reply_to=message.message_id)
                 service_message_ids.append(msg.message_id)
                 user_file_path = None
                 return
 
-            msg = await message.reply(get_message("send_file", language))
+            msg = await message.reply(get_message("send_file", language), reply_to=message.message_id)
             service_message_ids.append(msg.message_id)
             cleanup_files()
     except Exception as e:
-        msg = await message.reply(f"Error handling media: {e}")
+        msg = await message.reply(f"Error handling media: {e}", reply_to=message.message_id)
         service_message_ids.append(msg.message_id)
-
-
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
