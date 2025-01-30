@@ -1,5 +1,3 @@
-#config.py
-
 # Your API ID from my.telegram.org 
 api_id = 'YOUR_API_ID'
 

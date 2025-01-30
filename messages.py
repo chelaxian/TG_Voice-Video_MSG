@@ -1,4 +1,3 @@
-#messages.py
 from config import max_file_size_mb
 
 def get_user_link(user_id):
